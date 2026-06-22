@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Tiếng Anh cùng Ms Lê Hằng English - Gamification Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #8854C0;
+            --accent-yellow: #FDCB6E;
+            --accent-teal: #00C9A7;
+            --correct-green: #00D26A;
+            --wrong-red: #FF4757;
+            --text-dark: #2C3E50;
+            --text-light: #FFFFFF;
+            --card-shadow: 0 10px 0px rgba(0,0,0,0.15);
+            --btn-3d-shadow: 0 6px 0px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #8854C0, #E0C3FC, #00C9A7, #FDCB6E);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* SVG floating background elements */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 25px;
+            padding: 10px;
+            z-index: 10;
+        }
+
+        .teacher-title {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 16px;
+            border-radius: 50px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid var(--accent-yellow);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            margin: 0;
+        }
+
+        .main-heading {
+            font-size: 2.2rem;
+            color: var(--text-light);
+            text-shadow: 0 4px 0px rgba(0,0,0,0.2);
+            margin: 10px 0 5px 0;
+        }
+
+        /* Lời nhắc cực kỳ quan trọng */
+        .warning-box {
+            background: linear-gradient(135deg, #FFF3CD, #FFEBAA);
+            border: 4px solid var(--accent-yellow);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            transform: rotate(-0.5deg);
+        }
+        .warning-box h3 {
+            color: #856404;
+            margin-top: 0;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+        .warning-box p {
+            color: #664d03;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin: 10px 0;
+            text-align: justify;
+        }
+        .warning-box .bold-alert {
+            font-weight: bold;
+            color: var(--wrong-red);
+            text-decoration: underline;
+        }
+        .warning-box .scrolling-reminder {
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-top: 15px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        /* Container & Cards Layout */
+        .container {
+            max-width: 900px;
+            width: 95%;
+            margin-bottom: 80px;
+            z-index: 5;
+        }
+
+        /* Navigation Tabs */
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            background-color: var(--text-light);
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            padding: 10px 18px;
+            font-weight: bold;
+            color: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--primary);
+            font-size: 0.95rem;
+        }
+        .tab-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: var(--text-light);
+            box-shadow: 0 4px 0 #5E338A;
+            border-color: #5E338A;
+        }
+
+        /* Exercise Section Card */
+        .exercise-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            border: 5px solid var(--primary);
+            margin-bottom: 30px;
+        }
+        .exercise-section.active {
+            display: block;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exercise-title {
+            font-size: 1.6rem;
+            color: var(--primary);
+            border-bottom: 3px dashed var(--accent-yellow);
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        /* Question Layout inside Card */
+        .question-card {
+            background: #F8F9FA;
+            border: 3px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .question-card.answered-correct {
+            border-color: var(--correct-green);
+            background-color: #E8FDF0;
+        }
+        .question-card.answered-wrong {
+            border-color: var(--wrong-red);
+            background-color: #FFECEE;
+        }
+
+        .question-num {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--text-light);
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        /* Subline for highlighting targets (e.g. phonetics) */
+        .question-text u {
+            color: var(--wrong-red);
+            text-decoration-thickness: 3px;
+            font-weight: bold;
+        }
+
+        /* Answers List Styles */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        @media(max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-btn {
+            background-color: var(--text-light);
+            border: 3px solid #CBD5E1;
+            border-radius: 18px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #CBD5E1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(0);
+        }
+
+        .option-btn:hover:not([disabled]) {
+            transform: scale(1.02) translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 7px 0 var(--primary);
+        }
+
+        .option-btn:active:not([disabled]) {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-green) !important;
+            color: white !important;
+            border-color: #00A352 !important;
+            box-shadow: 0 5px 0 #00A352 !important;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-red) !important;
+            color: white !important;
+            border-color: #D63031 !important;
+            box-shadow: 0 5px 0 #D63031 !important;
+        }
+
+        /* Dynamic Shake Animation for Incorrect Answers */
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Interactive Blanks Popup Style */
+        .blank-btn {
+            background-color: var(--accent-yellow);
+            color: var(--text-dark);
+            border: 2px dashed var(--primary);
+            padding: 2px 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            margin: 0 5px;
+            box-shadow: 0 3px 0 var(--primary);
+        }
+        .blank-btn.selected-correct {
+            background-color: var(--correct-green);
+            color: white;
+            border-style: solid;
+            box-shadow: 0 3px 0 #00A352;
+        }
+        .blank-btn.selected-wrong {
+            background-color: var(--wrong-red);
+            color: white;
+            border-style: solid;
+            box-shadow: 0 3px 0 #D63031;
+        }
+
+        /* Explanation Card style - SIÊU CHI TIẾT */
+        .explanation-box {
+            margin-top: 15px;
+            background: #EBF8FF;
+            border-left: 6px solid #3182CE;
+            border-radius: 15px;
+            padding: 15px 20px;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .explanation-box.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .explanation-header {
+            font-weight: bold;
+            color: #2B6CB0;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #2D3748;
+        }
+
+        .explanation-step {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed rgba(49, 130, 206, 0.2);
+            padding-bottom: 8px;
+        }
+        .explanation-step:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        /* Exercise 6 - Custom CSS / SVG Graphic Cards Matching Game */
+        .matching-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .matching-card {
+            background: white;
+            border: 3px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .matching-card.correct {
+            border-color: var(--correct-green);
+            background: #E8FDF0;
+        }
+
+        .graphic-container {
+            width: 150px;
+            height: 120px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .matching-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            background: white;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 4px 0 var(--primary);
+        }
+        .matching-select:focus {
+            box-shadow: 0 2px 0 var(--primary);
+            transform: translateY(2px);
+        }
+
+        /* Q29 Custom CSS Drawing Sign */
+        .css-sale-sign {
+            width: 160px;
+            height: 100px;
+            background: #FF4757;
+            border: 4px solid #FFF;
+            border-radius: 12px;
+            box-shadow: 0 8px 0 #D63031, 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            transform: rotate(-3deg);
+            margin: 20px auto;
+        }
+        .css-sale-sign::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #DDD;
+            border-radius: 50%;
+            position: absolute;
+            top: 6px;
+        }
+        .sale-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px #000;
+        }
+        .sale-sub {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--accent-yellow);
+        }
+
+        /* Q30 Custom Phone message box style */
+        .phone-mockup {
+            width: 250px;
+            background: #FFF;
+            border: 10px solid #2C3E50;
+            border-radius: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+            font-size: 0.85rem;
+            margin: 20px auto;
+        }
+        .phone-header {
+            background: #2C3E50;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .phone-messages {
+            padding: 10px;
+            background: #EFEFF4;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .msg-bubble {
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            font-weight: bold;
+        }
+        .msg-bubble.sent {
+            background: #00D26A;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .msg-bubble.received {
+            background: #E5E5EA;
+            color: black;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        /* Master Controls Bar & Popups */
+        .footer-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .score-box {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 30px;
+            background: #E2E8F0;
+            height: 16px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-teal), var(--correct-green));
+            width: 0%;
+            border-radius: 10px;
+        }
+
+        .submit-btn {
+            background-color: var(--correct-green);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #00A352;
+        }
+        .submit-btn:hover {
+            transform: scale(1.05);
+        }
+        .submit-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        /* Popup Box Style for Fill selection */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay.show {
+            display: flex;
+        }
+        .selector-popup {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            border: 4px solid var(--primary);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .selector-popup h4 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .popup-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .popup-choice-btn {
+            background: white;
+            border: 3px solid #E2E8F0;
+            border-radius: 15px;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #CBD5E1;
+        }
+        .popup-choice-btn:hover {
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+        }
+
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Feedback Popup */
+        .feedback-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 30px;
+            border: 6px solid var(--primary);
+            padding: 30px;
+            z-index: 2000;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            text-align: center;
+            animation: bounceIn 0.4s ease;
+        }
+        .feedback-popup.show {
+            display: block;
+        }
+        .feedback-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--accent-yellow);
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            border: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        .feedback-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .feedback-score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--correct-green);
+            margin: 15px 0;
+        }
+        .feedback-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #4A5568;
+            margin-bottom: 20px;
+        }
+        .feedback-close {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #5E338A;
+        }
+        .feedback-close:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <header>
+        <p class="teacher-title"><i class="fa-solid fa-graduation-cap"></i> Giáo viên tạo: Ms Lê Hằng English</p>
+        <h1 class="main-heading">🌟 Ôn Tập Tiếng Anh Siêu Cấp 🌟</h1>
+    </header>
+
+    <div class="warning-box">
+        <h3>⚠️ LỜI NHẮC CỰC KỲ QUAN TRỌNG ⚠️</h3>
+        <p>Chỉ có <span class="bold-alert">đọc kỹ giải thích ngay sau mỗi câu</span>, sau đó ghi lại từ vựng/cấu trúc mới vào vở để học thì mới thực sự giỏi lên.</p>
+        <p>Làm cho xong mà không đọc giải thích hay đọc qua loa không ghi chép thì chỉ tốn thời gian vô ích!</p>
+        <div class="scrolling-reminder">* Kéo tới đâu, làm tới đó! *</div>
+    </div>
+
+    <div class="container">
+        <!-- Tab navigation for sections to keep UI clean and gamified -->
+        <nav class="tabs-nav" id="exercise-tabs"></nav>
+
+        <!-- Dynamic Area for Exercise Card Containers -->
+        <div id="exercises-container"></div>
+    </div>
+
+    <!-- Selector Overlay for Gap-filling -->
+    <div class="overlay" id="popup-overlay">
+        <div class="selector-popup">
+            <h4 id="popup-title">Chọn đáp án đúng nhất:</h4>
+            <div class="popup-choices" id="popup-choices"></div>
+        </div>
+    </div>
+
+    <!-- Final Evaluation Dialog -->
+    <div class="feedback-popup" id="feedback-dialog">
+        <div class="feedback-avatar">👩‍🏫</div>
+        <div class="feedback-title">KẾT QUẢ BÀI THI</div>
+        <div class="feedback-score" id="feedback-score-display">0/100</div>
+        <div class="feedback-text" id="feedback-text-content"></div>
+        <button class="feedback-close" onclick="closeFeedback()">Làm lại nào! <i class="fa-solid fa-rotate-right"></i></button>
+    </div>
+
+    <!-- Master Controls Bar -->
+    <div class="footer-controls">
+        <div class="score-box">
+            <i class="fa-solid fa-star" style="color: var(--accent-yellow)"></i>
+            <span>⭐ Điểm của con: <span id="current-score">0</span></span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-indicator"></div>
+        </div>
+        <button class="submit-btn" onclick="submitExam()">NỘP BÀI <i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+
+    <script>
+        // WEB AUDIO API SYNTHESIZER
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtxObj = null;
+
+        function getAudioContext() {
+            if (!audioCtxObj) {
+                audioCtxObj = new AudioCtx();
+            }
+            return audioCtxObj;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    // Chime ding ding
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+
+                    setTimeout(() => {
+                        const osc2 = ctx.createOscillator();
+                        const gain2 = ctx.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(ctx.destination);
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+                        gain2.gain.setValueAtTime(0.15, ctx.currentTime);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                        osc2.start();
+                        osc2.stop(ctx.currentTime + 0.3);
+                    }, 100);
+                } else {
+                    // Fail Buzz
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(180, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.35);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                }
+            } catch (e) {
+                console.log("Audio not supported yet.");
+            }
+        }
+
+        // CONFETTI SYSTEM
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+        let confetti = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        function createConfetti() {
+            for (let i = 0; i < 60; i++) {
+                confetti.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 6,
+                    color: ["#8854C0", "#FDCB6E", "#00C9A7", "#00D26A", "#FF4757"][Math.floor(Math.random() * 5)],
+                    speed: Math.random() * 5 + 3,
+                    angle: Math.random() * 360,
+                    spin: Math.random() * 4 - 2
+                });
+            }
+        }
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            confetti.forEach((p, idx) => {
+                p.y += p.speed;
+                p.angle += p.spin;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+
+                if (p.y > canvas.height) confetti.splice(idx, 1);
+            });
+            if (confetti.length > 0) {
+                requestAnimationFrame(drawConfetti);
+            }
+        }
+
+        function triggerConfetti() {
+            createConfetti();
+            drawConfetti();
+        }
+
+        // DATABASE EXERCISES (Tự động xáo trộn và load dữ liệu đầy đủ 100%)
+        const examData = {
+            "exercise-3": {
+                title: "Exercise 3: Choose the odd one out in each group",
+                type: "mcq",
+                questions: [
+                    {
+                        qText: "Chọn từ khác loại với các từ còn lại:",
+                        options: ["plough", "cultivate", "harvest", "summer"],
+                        correct: "summer",
+                        explain: {
+                            trans: "plough (cày), cultivate (gieo trồng/trồng trọt), harvest (thu hoạch), summer (mùa hè).",
+                            transQ: "Chọn từ khác biệt trong các từ sau.",
+                            whyCorrect: "Summer là danh từ chỉ mùa trong năm. Ba từ còn lại đều là động từ liên quan đến hoạt động nông nghiệp gieo cấy trồng trọt.",
+                            whyWrong: "plough (v): Cày ruộng; cultivate (v): Vun trồng; harvest (v): Gặt hái, đều chỉ hoạt động nông nghiệp."
+                        }
+                    },
+                    {
+                        qText: "Chọn từ khác loại với các từ còn lại:",
+                        options: ["cow", "buffalo", "hen", "pig"],
+                        correct: "hen",
+                        explain: {
+                            trans: "cow (con bò sữa), buffalo (con trâu), hen (con gà mái), pig (con lợn).",
+                            transQ: "Chọn từ khác biệt trong các từ sau.",
+                            whyCorrect: "Hen là gia cầm (loài chim hai chân có cánh), ba từ còn lại đều là gia súc (loài động vật bốn chân).",
+                            whyWrong: "cow (n): bò; buffalo (n): trâu; pig (n): heo, đều là động vật bốn chân thuộc nhóm gia súc lớn."
+                        }
+                    },
+                    {
+                        qText: "Chọn từ khác loại với các từ còn lại:",
+                        options: ["train", "bus", "car", "harvester"],
+                        correct: "harvester",
+                        explain: {
+                            trans: "train (tàu hỏa), bus (xe buýt), car (xe ô tô), harvester (máy gặt).",
+                            transQ: "Chọn từ khác biệt trong các từ sau.",
+                            whyCorrect: "Harvester là một loại máy công nghiệp nông nghiệp để thu hoạch mùa màng. Ba loại còn lại đều là phương tiện giao thông chở khách công cộng hoặc cá nhân thông thường.",
+                            whyWrong: "train, bus, car đều dùng để đi lại di chuyển đường bộ/đường sắt."
+                        }
+                    },
+                    {
+                        qText: "Chọn từ khác loại với các từ còn lại:",
+                        options: ["peaceful", "paddy field", "orchard", "pond"],
+                        correct: "peaceful",
+                        explain: {
+                            trans: "peaceful (thanh bình/yên ả), paddy field (cánh đồng lúa), orchard (vườn cây ăn quả), pond (cái ao).",
+                            transQ: "Chọn từ khác biệt trong các từ sau.",
+                            whyCorrect: "Peaceful là tính từ (adj). Ba từ còn lại đều là danh từ (n) chỉ địa điểm phong cảnh nông thôn thực tế.",
+                            whyWrong: "paddy field, orchard, pond đều là danh từ chỉ vật thể nơi chốn vùng quê."
+                        }
+                    },
+                    {
+                        qText: "Chọn từ khác loại với các từ còn lại:",
+                        options: ["milk cows", "picturesque", "dry rice", "feed pigs"],
+                        correct: "picturesque",
+                        explain: {
+                            trans: "milk cows (vắt sữa bò), picturesque (đẹp như tranh), dry rice (phơi thóc), feed pigs (cho heo ăn).",
+                            transQ: "Chọn từ khác loại trong các từ sau.",
+                            whyCorrect: "Picturesque là tính từ miêu tả vẻ đẹp của một cảnh quan. Ba từ còn lại đều là cụm động từ chỉ các hoạt động lao động thường ngày của người nông dân.",
+                            whyWrong: "milk cows, dry rice, feed pigs đều mô tả các hành động cụ thể tại nông trang."
+                        }
+                    }
+                ]
+            },
+            "exercise-4": {
+                title: "Exercise 4: Choose the best fits in each sentences",
+                type: "mcq",
+                questions: [
+                    {
+                        qText: "The farmers in this village are _________ and hospitable.",
+                        options: ["slowly", "hard-working", "hardly", "badly"],
+                        correct: "hard-working",
+                        explain: {
+                            trans: "A. slowly (adv): chậm chạp; B. hard-working (adj): chăm chỉ; C. hardly (adv): hầu như không; D. badly (adv): tồi tệ.",
+                            transQ: "Những người nông dân ở ngôi làng này thì _________ và hiếu khách.",
+                            whyCorrect: "Cần một tính từ song hành với 'hospitable' qua từ kết nối 'and' để bổ nghĩa cho chủ từ danh từ 'The farmers'. Hard-working (chăm chỉ) là tính từ tích cực cực kì phù hợp.",
+                            whyWrong: "slowly, hardly, badly đều là phó từ (trạng từ), không đứng sau động từ tobe 'are' để phối hợp trực tiếp với tính từ 'hospitable'."
+                        }
+                    },
+                    {
+                        qText: "Lucy dances _________ than Mary does.",
+                        options: ["beautiful", "beautifully", "more beautifully", "more beautiful"],
+                        correct: "more beautifully",
+                        explain: {
+                            trans: "A. beautiful (adj); B. beautifully (adv); C. more beautifully (so sánh hơn của trạng từ); D. more beautiful (so sánh hơn của tính từ).",
+                            transQ: "Lucy nhảy múa _________ so với Mary.",
+                            whyCorrect: "Hành động nhảy múa 'dances' là động từ thường nên ta phải dùng một trạng từ (beautifully). Có từ so sánh 'than' nên ta phải dùng cấu trúc so sánh hơn: 'more beautifully'.",
+                            whyWrong: "A và D sai vì dùng tính từ cho động từ thường. B sai vì chưa có so sánh hơn."
+                        }
+                    },
+                    {
+                        qText: "After an hour walking between the green paddy _______, we finally reached the village entrance.",
+                        options: ["places", "fields", "yards", "courts"],
+                        correct: "fields",
+                        explain: {
+                            trans: "A. places (n): địa điểm; B. fields (n): đồng ruộng; C. yards (n): cái sân; D. courts (n): sân bóng/tòa án.",
+                            transQ: "Sau một giờ đi bộ giữa những cánh đồng lúa xanh ngát, cuối cùng chúng tôi đã đến cổng làng.",
+                            whyCorrect: "Cụm danh từ cố định là 'paddy field' mang nghĩa là cánh đồng lúa nước trồng thóc gạo gieo cấy.",
+                            whyWrong: "Các từ places, yards, courts không kết hợp tạo nghĩa phù hợp với từ 'paddy'."
+                        }
+                    },
+                    {
+                        qText: "We can enjoy the fresh air and beauty in the_______.",
+                        options: ["city", "factory", "countryside", "gas station"],
+                        correct: "countryside",
+                        explain: {
+                            trans: "A. city (thành phố); B. factory (nhà máy); C. countryside (nông thôn); D. gas station (trạm xăng).",
+                            transQ: "Chúng ta có thể tận hưởng không khí trong lành và vẻ đẹp ở _________.",
+                            whyCorrect: "Nông thôn (countryside) là nơi nổi tiếng có không khí trong lành, cây xanh và phong cảnh thiên nhiên yên bình tuyệt đẹp thích hợp nghỉ dưỡng.",
+                            whyWrong: "Thành phố, nhà máy, trạm xăng đều là những nơi khói bụi ồn ào ô nhiễm không có không khí trong lành tự nhiên."
+                        }
+                    },
+                    {
+                        qText: "The small bamboo forest _______ the entrance to the village makes it picturesque.",
+                        options: ["at", "in", "on", "to"],
+                        correct: "at",
+                        explain: {
+                            trans: "A. at (tại); B. in (trong); C. on (trên); D. to (tới).",
+                            transQ: "Rặng tre nhỏ ở ngay cổng vào của làng làm cho nó trông đẹp như tranh vẽ.",
+                            whyCorrect: "Giới từ 'at' thường dùng để chỉ một địa điểm cụ thể tại một điểm dừng chân nào đó như 'at the entrance' (tại lối vào).",
+                            whyWrong: "in (trong lòng rặng tre không hợp nghĩa), on (bề mặt phẳng), to (hướng chuyển động không đúng ngữ cảnh tĩnh)."
+                        }
+                    },
+                    {
+                        qText: "Alice met Aly’s family at his house _______ the early morning.",
+                        options: ["on", "at", "in", "about"],
+                        correct: "in",
+                        explain: {
+                            trans: "A. on; B. at; C. in; D. about.",
+                            transQ: "Alice đã gặp gia đình Aly tại nhà của anh ấy vào lúc sáng sớm.",
+                            whyCorrect: "Theo quy tắc ngữ pháp tiếng Anh, các buổi trong ngày đi với giới từ 'in' như: in the morning, in the afternoon, in the early morning.",
+                            whyWrong: "on thường dùng với các thứ hoặc ngày cụ thể; at đi với giờ giấc cụ thể như at 7 o'clock."
+                        }
+                    },
+                    {
+                        qText: "I am _______ on visiting my grandparents' on the weekend.",
+                        options: ["fond", "keen", "interested", "bored"],
+                        correct: "keen",
+                        explain: {
+                            trans: "A. fond (thích); B. keen (say mê); C. interested (quan tâm); D. bored (chán nản).",
+                            transQ: "Tôi rất thích đi thăm ông bà của tôi vào dịp cuối tuần.",
+                            whyCorrect: "Cấu trúc tính từ đi kèm giới từ cố định: 'be keen on + V-ing' nghĩa là say mê, vô cùng ưa thích hành động gì đó.",
+                            whyWrong: "fond đi với 'of'; interested đi với 'in'; bored đi với 'with'."
+                        }
+                    },
+                    {
+                        qText: "She walked _________ than other people on the street because she got up late.",
+                        options: ["quickly", "quick", "quicker", "more quickly"],
+                        correct: "more quickly",
+                        explain: {
+                            trans: "A. quickly (adv); B. quick (adj); C. quicker (so sánh hơn tính từ); D. more quickly (so sánh hơn phó từ).",
+                            transQ: "Cô ấy đi bộ nhanh hơn những người khác trên phố vì cô ấy thức dậy muộn.",
+                            whyCorrect: "Walked là động từ thường nên cần bổ nghĩa bằng trạng từ. Ở đây là so sánh hơn vì có từ 'than', trạng từ dài 'quickly' chuyển thành 'more quickly'.",
+                            whyWrong: "quicker là so sánh hơn của tính từ hoặc trạng từ ngắn (thông tục), trong thi cử chính thống trạng từ dài 'quickly' bắt buộc so sánh hơn bằng 'more quickly'."
+                        }
+                    },
+                    {
+                        qText: "His sister plays badminton _________ than I do.",
+                        options: ["best", "better", "good", "well"],
+                        correct: "better",
+                        explain: {
+                            trans: "A. best (tốt nhất); B. better (tốt hơn); C. good (tốt - adj); D. well (tốt - adv).",
+                            transQ: "Em gái của anh ấy chơi cầu lông tốt hơn tôi chơi.",
+                            whyCorrect: "'Plays' là động từ thường nên cần bổ ngữ là trạng từ. Trạng từ gốc là 'well', khi chuyển sang so sánh hơn với từ 'than' biến đổi bất quy tắc thành 'better'.",
+                            whyWrong: "best dùng cho so sánh nhất; good là tính từ không bổ nghĩa động từ thường plays."
+                        }
+                    },
+                    {
+                        qText: "Russia is a _______ country with a lot of natural resources.",
+                        options: ["vast", "envious", "cultivable", "far"],
+                        correct: "vast",
+                        explain: {
+                            trans: "A. vast (adj - rộng lớn); B. envious (đố kỵ); C. cultivable (có thể canh tác); D. far (xa).",
+                            transQ: "Nước Nga là một đất nước rộng lớn bao la với rất nhiều tài nguyên thiên nhiên.",
+                            whyCorrect: "Nga là nước có diện tích lãnh thổ lớn nhất thế giới, vì thế từ tính từ phù hợp nhất về mặt địa lý và nghĩa là 'vast' (bao la, rộng lớn).",
+                            whyWrong: "Các từ khác không hợp nghĩa miêu tả quy mô quốc gia giàu tài nguyên."
+                        }
+                    },
+                    {
+                        qText: "Farmers often leave the rice in the sun to _______.",
+                        options: ["damp", "wet", "warm", "dry"],
+                        correct: "dry",
+                        explain: {
+                            trans: "A. damp (ẩm thấp); B. wet (ẩm ướt); C. warm (làm ấm); D. dry (phơi khô).",
+                            transQ: "Những người nông dân thường phơi thóc gạo dưới ánh nắng mặt trời để phơi khô.",
+                            whyCorrect: "Phơi nắng là hành động làm bốc hơi hết nước giúp hạt lúa khô ráo (dry) để bảo quản được lâu.",
+                            whyWrong: "ẩm hoặc ướt hoàn toàn ngược lại mục đích thu hoạch thóc lúa."
+                        }
+                    },
+                    {
+                        qText: "They _______ the buffalo-drawn cart with hay.",
+                        options: ["built", "hugged", "loaded", "milked"],
+                        correct: "loaded",
+                        explain: {
+                            trans: "A. built (xây dựng); B. hugged (ôm); C. loaded (chất lên); D. milked (vắt sữa).",
+                            transQ: "Họ chất rơm đầy lên chiếc xe kéo do trâu kéo kéo đi.",
+                            whyCorrect: "Cụm từ 'load something with something' nghĩa là chất/xếp cái gì đó đầy lên xe hoặc phương tiện vận chuyển.",
+                            whyWrong: "Không thể ôm rơm hay vắt sữa xe bò."
+                        }
+                    },
+                    {
+                        qText: "Farmers always need extra help with the _______.",
+                        options: ["accident", "harvest", "explosion", "cattle"],
+                        correct: "harvest",
+                        explain: {
+                            trans: "A. accident (tai nạn); B. harvest (vụ gặt hái thu hoạch); C. explosion (vụ nổ); D. cattle (gia súc).",
+                            transQ: "Những người nông dân luôn luôn cần thêm người giúp đỡ khi vào vụ thu hoạch mùa màng.",
+                            whyCorrect: "Mùa gặt hái (harvest) là thời điểm bận rộn khẩn trương nhất của nông thôn, cần lượng lớn lao động làm việc liên tục.",
+                            whyWrong: "tai nạn hay vụ nổ không phải là việc làm nông thường nhật cần giúp đỡ."
+                        }
+                    },
+                    {
+                        qText: "My uncle raises a herd of _______ on his farm.",
+                        options: ["cattle", "fruit", "countryside", "village"],
+                        correct: "cattle",
+                        explain: {
+                            trans: "A. cattle (đàn gia súc trâu bò); B. fruit (trái cây); C. countryside (nông thôn); D. village (làng mạc).",
+                            transQ: "Chú của tôi chăn nuôi một đàn gia súc trâu bò lớn trên nông trại của chú ấy.",
+                            whyCorrect: "Cụm từ chỉ đàn động vật: 'a herd of cattle' nghĩa là một đàn gia súc lớn bốn chân gặm cỏ như trâu, bò sữa.",
+                            whyWrong: "Trái cây hay làng mạc không thể xếp thành đàn bầy gặm cỏ."
+                        }
+                    },
+                    {
+                        qText: "You should explain _________ for everyone.",
+                        options: ["clearly", "clear", "clearer", "clearest"],
+                        correct: "clearly",
+                        explain: {
+                            trans: "A. clearly (adv); B. clear (adj); C. clearer (so sánh hơn); D. clearest (so sánh nhất).",
+                            transQ: "Bạn nên giải thích một cách rõ ràng dễ hiểu cho tất cả mọi người.",
+                            whyCorrect: "Động từ thường 'explain' (giải thích) đòi hỏi bổ nghĩa bằng một phó từ/trạng từ ở dạng nguyên bản để chỉ cách thức hành động: 'clearly'.",
+                            whyWrong: "clear là tính từ không đi kèm trực tiếp bổ nghĩa cho động từ thường explain."
+                        }
+                    },
+                    {
+                        qText: "Life in the village is _________.",
+                        options: ["peace", "peacefully", "peaceful", "more peacefully"],
+                        correct: "peaceful",
+                        explain: {
+                            trans: "A. peace (danh từ); B. peacefully (trạng từ); C. peaceful (tính từ); D. more peacefully (so sánh trạng từ).",
+                            transQ: "Cuộc sống ở vùng quê làng mạc thật là yên bình tĩnh lặng.",
+                            whyCorrect: "Liên động từ 'is' (động từ tobe) cần một tính từ miêu tả trạng thái tính chất chủ ngữ 'Life in the village'. Tính từ phù hợp là 'peaceful'.",
+                            whyWrong: "peacefully là trạng từ không đứng trực tiếp làm bổ ngữ sau tobe để tả đặc tính chủ từ."
+                        }
+                    },
+                    {
+                        qText: "A boat is _______ than a plane.",
+                        options: ["slower", "slowest", "more slow", "more slower"],
+                        correct: "slower",
+                        explain: {
+                            trans: "A. slower; B. slowest; C. more slow; D. more slower.",
+                            transQ: "Một chiếc thuyền buồm hoặc tàu thủy thì chạy chậm hơn một chiếc máy bay phản lực.",
+                            whyCorrect: "Slow là tính từ ngắn một âm tiết. Khi so sánh hơn ta thêm đuôi '-er' thành 'slower'.",
+                            whyWrong: "Không sử dụng more đứng trước tính từ ngắn và không gấp đôi dạng so sánh (more slower là sai ngữ pháp)."
+                        }
+                    },
+                    {
+                        qText: "My sister dances _______ than me.",
+                        options: ["gooder", "weller", "better", "more good"],
+                        correct: "better",
+                        explain: {
+                            trans: "A. gooder; B. weller; C. better; D. more good.",
+                            transQ: "Chị gái tôi nhảy múa tốt/đẹp hơn tôi nhảy.",
+                            whyCorrect: "Trạng từ so sánh hơn của 'well' (bổ nghĩa cho động từ thường dances) là từ biến đổi bất quy tắc đặc biệt 'better'.",
+                            whyWrong: "Không có các từ sai ngữ pháp như gooder, weller hay more good trong tiếng Anh."
+                        }
+                    },
+                    {
+                        qText: "This road is _______ than that road.",
+                        options: ["narrower", "narrow", "the most narrow", "more narrower"],
+                        correct: "narrower",
+                        explain: {
+                            trans: "A. narrower; B. narrow; C. the most narrow; D. more narrower.",
+                            transQ: "Con đường mòn này hẹp hơn con đường rải nhựa kia.",
+                            whyCorrect: "Tính từ 'narrow' (hẹp) kết thúc bằng '-ow' được coi như một tính từ ngắn, do đó so sánh hơn thêm đuôi '-er' tạo thành 'narrower'.",
+                            whyWrong: "narrower đã là dạng so sánh đúng, không dùng thêm 'more' để tránh lỗi lặp cấu trúc so sánh."
+                        }
+                    },
+                    {
+                        qText: "He drives _______ his brother.",
+                        options: ["more careful than", "more carefully", "more carefully than", "as careful as"],
+                        correct: "more carefully than",
+                        explain: {
+                            trans: "A. more careful than; B. more carefully; C. more carefully than; D. as careful as.",
+                            transQ: "Anh ấy lái xe một cách cẩn thận và an toàn hơn em trai của anh ấy.",
+                            whyCorrect: "Động từ 'drives' là động từ thường cần trạng từ để bổ nghĩa (carefully). So sánh hơn với đối tượng khác cần từ 'than', tạo thành 'more carefully than'.",
+                            whyWrong: "more careful than dùng sai từ loại (careful là tính từ không dùng với động từ thường drives)."
+                        }
+                    },
+                    {
+                        qText: "Things in the city are _______ than in the country.",
+                        options: ["moderner", "more moderner", "modern", "more modern"],
+                        correct: "more modern",
+                        explain: {
+                            trans: "A. moderner; B. more moderner; C. modern; D. more modern.",
+                            transQ: "Mọi thứ ở thành thị sầm uất thì hiện đại hơn ở nông thôn quê hương.",
+                            whyCorrect: "Modern là tính từ 2 âm tiết dài thông thường, so sánh hơn cần thêm từ 'more' đứng trước tính từ giữ nguyên: 'more modern'.",
+                            whyWrong: "moderner là từ không được chấp nhận rộng rãi theo ngữ pháp tiếng Anh chuẩn mực."
+                        }
+                    },
+                    {
+                        qText: "The farmers are busy _________ their crops.",
+                        options: ["to harvest", "harvest", "harvesting", "harvested"],
+                        correct: "harvesting",
+                        explain: {
+                            trans: "A. to harvest; B. harvest; C. harvesting; D. harvested.",
+                            transQ: "Những người nông dân đang bận rộn thu hoạch nông sản hoa màu của họ.",
+                            whyCorrect: "Cấu trúc ngữ pháp cố định: 'be busy + V-ing' chỉ trạng thái bận rộn làm một công việc gì đó vào thời điểm hiện tại.",
+                            whyWrong: "Các phương án chứa động từ nguyên thể hay quá khứ hoàn thành đều không tuân thủ mẫu câu 'busy + V-ing'."
+                        }
+                    },
+                    {
+                        qText: "I can hear what you are saying. Can you speak a bit . _________ ?",
+                        options: ["slower", "more slowly", "slow", "slowest"],
+                        correct: "more slowly",
+                        explain: {
+                            trans: "A. slower; B. more slowly; C. slow; D. slowest.",
+                            transQ: "Tôi có thể nghe thấy những gì bạn đang nói rồi. Bạn có thể nói chậm lại một chút được không?",
+                            whyCorrect: "Hành động nói 'speak' yêu cầu đi cùng trạng từ để bổ nghĩa chỉ cách thức nói năng. Trạng từ dài 'slowly' trong dạng so sánh hơn là 'more slowly'.",
+                            whyWrong: "slower là tính từ hoặc trạng từ ngắn ít lịch sự hơn phó từ chính quy 'more slowly' khi dùng trong câu nhờ vả giao tiếp chuẩn mực."
+                        }
+                    },
+                    {
+                        qText: "Every afternoon they went to the park to ______ the ducks with their favorite food.",
+                        options: ["raise", "catch", "feed", "milk"],
+                        correct: "feed",
+                        explain: {
+                            trans: "A. raise (nuôi nấng); B. catch (bắt giữ); C. feed (cho ăn); D. milk (vắt sữa).",
+                            transQ: "Mỗi buổi chiều họ đều ra công viên để cho lũ vịt ăn món ăn ưa thích của chúng.",
+                            whyCorrect: "Cho động vật ăn bằng thức ăn được cung cấp sẵn dùng động từ hành động là 'feed'.",
+                            whyWrong: "vắt sữa vịt hay nuôi nấng chúng tại công viên công cộng là không hợp lý."
+                        }
+                    },
+                    {
+                        qText: "It's ______ when fruits are all ripe and local people ______ them in the orchard.",
+                        options: ["harvest time/ pick", "harvest/ choose", "life/ decide", "harvest time/ gather"],
+                        correct: "harvest time/ pick",
+                        explain: {
+                            trans: "A. harvest time/ pick (mùa gặt/hái); B. harvest/ choose; C. life/ decide; D. harvest time/ gather.",
+                            transQ: "Đó là _________ khi các trái cây đều đã chín và người dân địa phương _________ chúng trong vườn.",
+                            whyCorrect: "Khi trái cây chín rộ trên cành thì đó là 'harvest time' (vụ thu hoạch quả ngọt) và hành động hái quả trực tiếp từ cành xuống rổ là dùng từ 'pick'.",
+                            whyWrong: "gather thóc gạo hoặc các loại hạt dưới đất, quả ngọt treo trên cây thì dùng động từ hái 'pick' chính xác nhất."
+                        }
+                    },
+                    {
+                        qText: "In those days when I was at high school, I often helped my parents to ______ crops at harvest time.",
+                        options: ["save", "gather", "collect", "all are correct"],
+                        correct: "all are correct",
+                        explain: {
+                            trans: "A. save (bảo quản/gặt trữ); B. gather (thu lượm hoa màu); C. collect (gom góp vụ mùa); D. all are correct (Tất cả đều đúng).",
+                            transQ: "Vào những ngày khi tôi học trung học, tôi thường giúp cha mẹ thu hoạch mùa màng vào ngày gặt.",
+                            whyCorrect: "Các động từ save crops (cất giữ thu hoạch), gather crops, collect crops đều có thể được chấp nhận rộng rãi trong văn phong nông nghiệp để chỉ hoạt động thu hoạch mang mùa màng về nhà bảo quản.",
+                            whyWrong: "Do cả ba phương án đều tự nhiên và đúng nghĩa ngữ cảnh nông thôn nên chọn D."
+                        }
+                    },
+                    {
+                        qText: "When I was a boy, my granddad used to ______ fish from the pond behind his house.",
+                        options: ["hold", "pick", "catch", "feed"],
+                        correct: "catch",
+                        explain: {
+                            trans: "A. hold (cầm nắm); B. pick (hái quả); C. catch (đánh bắt cá); D. feed (cho cá ăn).",
+                            transQ: "Khi tôi còn là một cậu bé, ông của tôi thường bắt cá dưới ao nước nhỏ phía sau nhà.",
+                            whyCorrect: "Cụm từ đi liền 'catch fish' dùng để chỉ hành động đánh cá, câu cá hay quăng lưới bắt cá dưới ao hồ sông ngòi.",
+                            whyWrong: "pick dùng cho quả cây, hold là ôm giữ tạm thời không chỉ hành động đi câu bắt thủy sản."
+                        }
+                    },
+                    {
+                        qText: "After cutting rice from the field, farmers ______ it in the sun for 2 or 3 days.",
+                        options: ["drain", "bake", "dry", "plough"],
+                        correct: "dry",
+                        explain: {
+                            trans: "A. drain (gạn nước); B. bake (nướng bánh); C. dry (phơi khô); D. plough (cày bừa ruộng).",
+                            transQ: "Sau khi cắt lúa mang từ cánh đồng về, những người nông dân thường phơi thóc khô dưới nắng từ 2 đến 3 ngày.",
+                            whyCorrect: "Hành động đặt hạt thóc tiếp xúc trực tiếp ánh mặt trời để lấy đi hơi ẩm được gọi là phơi khô 'dry'.",
+                            whyWrong: "Không thể nướng hay cày xới thóc đã gặt."
+                        }
+                    },
+                    {
+                        qText: "Duong Lam is one of __________ ancient villages in Ha Noi.",
+                        options: ["the most", "more", "most", "the more"],
+                        correct: "the most",
+                        explain: {
+                            trans: "A. the most; B. more; C. most; D. the more.",
+                            transQ: "Đường Lâm là một trong những ngôi làng cổ nhất ở thủ đô Hà Nội.",
+                            whyCorrect: "Cấu trúc so sánh nhất cho tính từ dài: 'one of + the most + tính từ dài + danh từ số nhiều'. 'Ancient' đóng vai trò là tính từ dài hai âm tiết.",
+                            whyWrong: "more dùng trong so sánh hơn giữa hai chủ thể, thiếu mạo từ 'the' cho so sánh nhất của phương án C."
+                        }
+                    },
+                    {
+                        qText: "Farmers in this village use a _________ to harvest their rice.",
+                        options: ["cow", "truck", "buffalo", "combine harvester"],
+                        correct: "combine harvester",
+                        explain: {
+                            trans: "A. cow (con bò); B. truck (xe tải); C. buffalo (con trâu); D. combine harvester (máy gặt đập liên hợp).",
+                            transQ: "Người nông dân ở làng quê này sử dụng một cái _________ để gặt hái thóc lúa của họ.",
+                            whyCorrect: "Combine harvester là loại máy kéo hiện đại có khả năng vừa cắt lúa vừa đập hạt đóng bao vô cùng tiết kiệm công sức gặt ruộng.",
+                            whyWrong: "Trâu hay bò sữa không thể gặt và tách hạt lúa tự động, xe tải chỉ dùng để thồ chở nông sản về nhà."
+                        }
+                    },
+                    {
+                        qText: "It is _______ in the city than it is in the country.",
+                        options: ["noisily", "more noisier", "noisier", "noisy"],
+                        correct: "noisier",
+                        explain: {
+                            trans: "A. noisily (trạng từ); B. more noisier (sai ngữ pháp); C. noisier (ồn ào hơn); D. noisy (ồn ào).",
+                            transQ: "Ở thành thị thì luôn luôn ồn ào và náo nhiệt hơn ở nông thôn yên tĩnh.",
+                            whyCorrect: "Noisy là tính từ ngắn (2 âm tiết tận cùng bằng đuôi '-y'). Khi so sánh hơn, y dài chuyển thành i ngắn rồi thêm đuôi '-er' tạo thành 'noisier'.",
+                            whyWrong: "more noisier là lỗi lặp từ so sánh nghiêm trọng. Noisily là trạng từ không đứng trực tiếp bổ nghĩa cho tobe 'is'."
+                        }
+                    },
+                    {
+                        qText: "The English test was _______ than I thought it would be.",
+                        options: ["the easier", "more easy", "easiest", "easier"],
+                        correct: "easier",
+                        explain: {
+                            trans: "A. the easier; B. more easy; C. easiest; D. easier.",
+                            transQ: "Bài kiểm tra tiếng Anh này dễ hơn tôi nghĩ lúc đầu rất nhiều.",
+                            whyCorrect: "Easy là tính từ 2 âm tiết kết thúc bằng đuôi '-y'. Chuyển sang so sánh hơn bằng cách biến đổi đuôi '-ier' tạo thành 'easier'.",
+                            whyWrong: "Không dùng 'more easy' trong văn phong học thuật chuẩn và so sánh hơn không đi kèm mạo từ 'the' đứng trước."
+                        }
+                    },
+                    {
+                        qText: "English is thought to be _______ than Math.",
+                        options: ["harder", "the more hard", "hardest", "the hardest"],
+                        correct: "harder",
+                        explain: {
+                            trans: "A. harder; B. the more hard; C. hardest; D. the hardest.",
+                            transQ: "Môn Tiếng Anh được một số người cho rằng khó học hơn môn Toán học.",
+                            whyCorrect: "Hard là tính từ ngắn 1 âm tiết, so sánh hơn ta thêm trực tiếp đuôi '-er' tạo thành 'harder'.",
+                            whyWrong: "hardest dùng trong so sánh nhất; không dùng more đứng trước tính từ ngắn."
+                        }
+                    },
+                    {
+                        qText: "Her office is _______ away than mine.",
+                        options: ["father", "more far", "farther", "farer"],
+                        correct: "farther",
+                        explain: {
+                            trans: "A. father (bố); B. more far; C. farther (xa hơn); D. farer.",
+                            transQ: "Văn phòng làm việc của cô ấy ở vị trí xa hơn so với văn phòng làm việc của tôi.",
+                            whyCorrect: "Far là tính từ biến đổi so sánh hơn bất quy tắc. Ta có hai dạng viết là 'farther' (dùng cho khoảng cách vật lý) hoặc 'further' (khoảng cách trừu tượng).",
+                            whyWrong: "father nghĩa là người bố ruột; farer là từ viết hoàn toàn sai chính tả."
+                        }
+                    },
+                    {
+                        qText: "The streets in cities are _______ than those in the countryside.",
+                        options: ["crowded", "more crowded", "crowdeder", "less crowded"],
+                        correct: "more crowded",
+                        explain: {
+                            trans: "A. crowded; B. more crowded; C. crowdeder; D. less crowded.",
+                            transQ: "Các đường phố ở khu đô thị đông đúc dân cư chật chội hơn so với những đường ở vùng nông thôn rộng lớn.",
+                            whyCorrect: "Crowded là tính từ hai âm tiết dài bình thường kết thúc đuôi '-ed', do đó cấu trúc so sánh hơn bắt buộc dùng 'more crowded'.",
+                            whyWrong: "crowdeder là tính từ sai cấu trúc biến đổi đuôi."
+                        }
+                    },
+                    {
+                        qText: "People use a truck to _________ rice to home.",
+                        options: ["load", "unload", "unloading", "loading"],
+                        correct: "load",
+                        explain: {
+                            trans: "A. load (v): xếp chất rơm thóc; B. unload (v): dỡ hàng; C. unloading; D. loading.",
+                            transQ: "Người dân sử dụng một chiếc xe tải thồ để chở gạo chất lên xe mang về nhà.",
+                            whyCorrect: "Cấu trúc chỉ mục đích: 'use something to + V-inf' (sử dụng cái gì để làm việc gì). Chọn động từ nguyên thể 'load' (chất hàng hóa thóc gạo lên xe).",
+                            whyWrong: "unloading và loading là dạng danh động từ đuôi '-ing' không phù hợp ngữ pháp sau giới từ chỉ mục đích 'to'."
+                        }
+                    },
+                    {
+                        qText: "Do you want to _________ cow on the farm?",
+                        options: ["drink", "milk", "plough", "dry"],
+                        correct: "milk",
+                        explain: {
+                            trans: "A. drink (uống); B. milk (vắt sữa); C. plough (cày đất); D. dry (phơi khô).",
+                            transQ: "Bạn có muốn trải nghiệm công việc vắt sữa bò trực tiếp tại trang trại hay không?",
+                            whyCorrect: "'Milk' khi sử dụng làm động từ mang nghĩa là thực hiện hành động vắt sữa từ bầu vú của động vật bò sữa, dê sữa.",
+                            whyWrong: "Không thể uống cả con bò hay đem con bò đi phơi khô sấy."
+                        }
+                    },
+                    {
+                        qText: "Farmers in Ly Nhon are ________ in the yard after they have harvested all the fields.",
+                        options: ["drying rice", "washing clothes", "dragon-snake", "milk cows"],
+                        correct: "drying rice",
+                        explain: {
+                            trans: "A. drying rice (phơi thóc); B. washing clothes (giặt quần áo); C. dragon-snake (rồng rắn lên mây); D. milk cows (vắt sữa bò).",
+                            transQ: "Những người nông dân ở xã Lý Nhơn đang phơi thóc gạo đầy sân sau khi họ gặt hái thu hoạch xong toàn bộ cánh đồng lúa.",
+                            whyCorrect: "Thu hoạch lúa xong thì hoạt động truyền thống cần thiết nhất là phơi hạt thóc (drying rice) dưới ánh mặt trời rực rỡ trên sân gạch cho khô ráo.",
+                            whyWrong: "Trò chơi rồng rắn lên mây hay giặt quần áo không liên quan trực tiếp hành động chế biến nông sản sau mùa gặt ruộng."
+                        }
+                    },
+                    {
+                        qText: "Can Gio is a suitable place to plant ________ suitable for saline soils.",
+                        options: ["cattle", "villagers", "orchards", "cows"],
+                        correct: "orchards",
+                        explain: {
+                            trans: "A. cattle (gia súc); B. villagers (dân làng); C. orchards (vườn quả); D. cows (con bò).",
+                            transQ: "Huyện Cần Giờ là một địa điểm vô cùng thích hợp để trồng những vườn cây ăn quả chịu được đất ngập mặn.",
+                            whyCorrect: "Động từ 'plant' mang nghĩa là trồng trọt cỏ cây, thực vật hoa lá, do đó tân ngữ thích hợp nhất là 'orchards' (vườn cây ăn trái trồng trên đất đai).",
+                            whyWrong: "Gia súc hay người dân làng không thể đem đi gieo trồng dưới lòng đất."
+                        }
+                    },
+                    {
+                        qText: "At the weekend, my family and I went to the countryside to visit our grandparents. On the way, we encountered many houses with ________ architecture.",
+                        options: ["ancient", "disturbing", "vast", "envious"],
+                        correct: "ancient",
+                        explain: {
+                            trans: "A. ancient (cổ kính); B. disturbing (gây phiền nhiễu); C. vast (rộng lớn); D. envious (ghen tị).",
+                            transQ: "Vào dịp cuối tuần, tôi và gia đình về quê thăm ông bà. Trên đường đi, chúng tôi đã bắt gặp nhiều ngôi nhà có kiến trúc cổ kính lâu đời.",
+                            whyCorrect: "Ở vùng nông thôn lâu đời thường có rất nhiều ngôi nhà cổ mái ngói rêu phong mang nét đẹp kiến trúc cổ xưa mộc mạc 'ancient architecture'.",
+                            whyWrong: "Các tính từ khác không dùng để bổ nghĩa miêu tả tính thẩm mỹ của nhà cửa cổ xưa ở làng quê."
+                        }
+                    },
+                    {
+                        qText: "The experience of ________ cows at Long Thanh dairy farm is a very memorable memory from my travels.",
+                        options: ["herding", "envying", "catching", "milking"],
+                        correct: "milking",
+                        explain: {
+                            trans: "A. herding (chăn dắt); B. envying (đố kỵ); C. catching (bắt giữ); D. milking (vắt sữa bò).",
+                            transQ: "Trải nghiệm tự tay vắt sữa bò sữa tại nông trang bò sữa Long Thành là một kỷ niệm vô cùng đáng nhớ trong chuyến hành trình du lịch của tôi.",
+                            whyCorrect: "Trang trại bò sữa (dairy farm) nổi tiếng với hoạt động trải nghiệm thực tế là học cách vắt sữa trực tiếp từ bầu vú bò - dùng danh động từ 'milking'.",
+                            whyWrong: "Các động từ khác không đặc trưng biểu đạt nét độc đáo tại nông trại chuyên sữa."
+                        }
+                    },
+                    {
+                        qText: "We really enjoyed flying kites over the green rice ________ during our picnic last year.",
+                        options: ["facilities", "hays", "fields", "collections"],
+                        correct: "fields",
+                        explain: {
+                            trans: "A. facilities (trang thiết bị); B. hays (rơm khô); C. fields (đồng ruộng); D. collections (bộ sưu tập).",
+                            transQ: "Chúng tôi thực sự vô cùng thích thú khi thả những cánh diều bay cao trên những cánh đồng lúa xanh ngắt trong buổi dã ngoại năm ngoái.",
+                            whyCorrect: "Cánh đồng lúa trồng mạ xanh rực rỡ rộng lớn là 'rice fields' - nơi trống trải lộng gió lý tưởng để trẻ em thả diều tự do bay lượn.",
+                            whyWrong: "Rơm rạ hay cơ sở vật chất không phù hợp để thả diều trên không trung rộng mở."
+                        }
+                    },
+                    {
+                        qText: "This village is famous _________ picturesque landscape.",
+                        options: ["on", "at", "for", "about"],
+                        correct: "for",
+                        explain: {
+                            trans: "A. on; B. at; C. for; D. about.",
+                            transQ: "Ngôi làng cổ kính này vô cùng nổi tiếng về phong cảnh non nước đẹp thơ mộng như một bức tranh vẽ.",
+                            whyCorrect: "Cấu trúc tính từ đi kèm giới từ cố định: 'be famous for something' mang ý nghĩa là nổi tiếng, được biết đến rộng rãi vì đặc tính hay sản vật gì.",
+                            whyWrong: "Giới từ khác đi cùng từ famous đều sai ngữ pháp cơ bản."
+                        }
+                    },
+                    {
+                        qText: "My grandmother loves _________ in the countryside.",
+                        options: ["live", "to live", "lived", "to living"],
+                        correct: "to live",
+                        explain: {
+                            trans: "A. live; B. to live; C. lived; D. to living.",
+                            transQ: "Bà nội của tôi vô cùng yêu thích cuộc sống yên bình tĩnh lặng ở vùng quê dân dã.",
+                            whyCorrect: "Theo quy tắc động từ chỉ sở thích: 'love + to V-inf' hoặc 'love + V-ing' đều diễn đạt việc yêu thích làm việc gì đó lâu dài ổn định.",
+                            whyWrong: "to living sai cấu trúc, live nguyên thể không đứng sau động từ chỉ cảm xúc yêu ghét nếu không có to."
+                        }
+                    },
+                    {
+                        qText: "How long will it take to ______ these bunches of rice onto the lorry?",
+                        options: ["cut", "fill", "load", "unload"],
+                        correct: "load",
+                        explain: {
+                            trans: "A. cut (cắt); B. fill (lấp đầy); C. load (chất lên xe); D. unload (dỡ hàng xuống).",
+                            transQ: "Sẽ mất khoảng bao nhiêu thời gian để chất hết những bó lúa gặt này lên trên thùng xe tải?",
+                            whyCorrect: "Hành động di chuyển các bó lúa từ mặt đất ruộng lên đặt gọn gàng vào trong thùng xe tải để chở đi gọi là xếp hàng lên xe 'load onto'.",
+                            whyWrong: "unload onto là sai (unload đi cùng giới từ from)."
+                        }
+                    },
+                    {
+                        qText: "The ______ is so peaceful with boys ______ the buffaloes on the slopes of the hill.",
+                        options: ["village/ guiding", "countryside/ herding", "paddy field/ leading", "life/ catching"],
+                        correct: "countryside/ herding",
+                        explain: {
+                            trans: "A. village/ guiding; B. countryside/ herding (nông thôn/chăn dắt trâu); C. paddy field/ leading; D. life/ catching.",
+                            transQ: "Vùng quê thanh bình vô cùng yên ả với hình ảnh những cậu bé đang chăn thả đàn trâu gặm cỏ trên sườn đồi xanh.",
+                            whyCorrect: "Động từ tả hành động xua đuổi dắt đàn gia súc đi gặm cỏ ngoài bãi đồng là 'herding' (herding the buffaloes - chăn trâu) và không gian sườn đồi bao la thuộc về 'countryside' (vùng nông thôn).",
+                            whyWrong: "guiding nghĩa là hướng dẫn viên du lịch không dùng với mục đích chăn dắt trâu bò ngoài đồng."
+                        }
+                    },
+                    {
+                        qText: "My grandmother was a peasant; she used to ______ rice from the buffalo-drawn cart.",
+                        options: ["carry", "load", "unload", "collect"],
+                        correct: "unload",
+                        explain: {
+                            trans: "A. carry (mang vác); B. load (chất hàng lên); C. unload (dỡ hàng xuống); D. collect (quyên góp lượm lặt).",
+                            transQ: "Bà của tôi là một người nông dân thực thụ; bà thường dỡ bao lúa thóc từ trên chiếc xe trâu kéo xuống kho chứa thóc.",
+                            whyCorrect: "Hành động lấy bớt đồ đạc nông sản bao gạo xếp từ trên xe bò/xe trâu kéo đặt xuống nền đất nhà kho gọi là dỡ hàng 'unload rice from'.",
+                            whyWrong: "load đi cùng giới từ onto không đi với giới từ chỉ nguồn gốc từ đâu xuống như 'from'."
+                        }
+                    },
+                    {
+                        qText: "After ______ the field, farmers grow some kinds of important ______ suitable for each season.",
+                        options: ["combining/ cattle", "collecting/ poultry", "ploughing/ crops", "cultivating/ harvest"],
+                        correct: "ploughing/ crops",
+                        explain: {
+                            trans: "A. combining/ cattle; B. collecting/ poultry; C. ploughing/ crops (cày ruộng/hoa màu trồng trọt); D. cultivating/ harvest.",
+                            transQ: "Sau khi cày ải đất cát ngoài cánh đồng lúa, những người nông dân bắt đầu gieo trồng các loại hoa màu nông nghiệp phù hợp với từng mùa vụ thời tiết.",
+                            whyCorrect: "Hành động tiền đề lật xới làm tơi xốp đất trước vụ gieo hạt trồng trọt là cày ruộng 'ploughing' và các loại sản phẩm thực vật thu hoạch được gọi là hoa màu 'crops'.",
+                            whyWrong: "poultry là gia cầm không thể gieo trồng sinh trưởng ngoài đồng ruộng sau khi cày cấy."
+                        }
+                    },
+                    {
+                        qText: "I heard the clank of buckets as they went to ______ the cows.",
+                        options: ["herd", "keep", "feed", "milk"],
+                        correct: "milk",
+                        explain: {
+                            trans: "A. herd (chăn gia súc); B. keep (giữ lại); C. feed (cho ăn); D. milk (vắt sữa).",
+                            transQ: "Tôi nghe thấy những tiếng leng keng va chạm của những chiếc xô sắt xách tay khi họ đi vắt sữa đàn bò sữa.",
+                            whyCorrect: "Chiếc xô xách tay 'buckets' dùng để hứng dòng sữa tươi mát chảy ra khi người nông dân thực hiện động tác vắt sữa bò 'milk the cows'.",
+                            whyWrong: "Chăn dắt trâu bò hay cho bò ăn cỏ ngoài đồng cỏ rộng lớn không cần dùng đến xô hứng chất lỏng leng keng."
+                        }
+                    },
+                    {
+                        qText: "There are a lot of bamboo trees _________ her house.",
+                        options: ["around", "at", "for", "on"],
+                        correct: "around",
+                        explain: {
+                            trans: "A. around (xung quanh); B. at (tại); C. for (cho); D. on (trên bề mặt).",
+                            transQ: "Có rất nhiều cây tre xanh cao lớn bao bọc xung quanh ngôi nhà nhỏ của cô ấy.",
+                            whyCorrect: "Cây xanh mọc bao quanh che bóng mát xung quanh nhà dùng giới từ không gian lý tưởng nhất là 'around' (ở các phía xung quanh ngôi nhà).",
+                            whyWrong: "bamboo mọc 'on her house' nghĩa là tre mọc trên nóc mái nhà - điều này vô lý không thực tế."
+                        }
+                    },
+                    {
+                        qText: "She couldn't get the first prize because she ran _________ than Mai.",
+                        options: ["slower", "slowly", "more slowly", "slowest"],
+                        correct: "more slowly",
+                        explain: {
+                            trans: "A. slower; B. slowly; C. more slowly; D. slowest.",
+                            transQ: "Cô ấy đã không thể đạt giải nhất cuộc thi chạy vì cô ấy chạy chậm hơn so với bạn Mai.",
+                            whyCorrect: "Động từ chạy 'ran' cần đi kèm phó từ trạng từ để làm rõ tốc độ. Phó từ dài của slow là 'slowly'. So sánh hơn với người khác cần dùng 'more slowly'.",
+                            whyWrong: "slower là trạng từ ngắn ít chính quy hơn cụm trạng từ ghép chính thức 'more slowly' dùng trong thi cử ngữ pháp học thuật."
+                        }
+                    },
+                    {
+                        qText: "City drivers have to drive _______ than country ones.",
+                        options: ["more careful", "more careless", "more carefully", "more carelessly"],
+                        correct: "more carefully",
+                        explain: {
+                            trans: "A. more careful; B. more careless; C. more carefully (cẩn thận hơn); D. more carelessly (ẩu hơn).",
+                            transQ: "Những người lái xe ở thành thị đông đúc đan xen xe cộ phải lái xe cẩn thận hơn nhiều so với những lái xe ở vùng nông thôn thoáng đãng.",
+                            whyCorrect: "Hành động lái xe 'drive' là động từ thường nên ta dùng trạng từ 'carefully'. Ngữ cảnh đường xá thành phố chật hẹp xe cộ đông đúc đòi hỏi lái xe an toàn hơn nên chọn 'more carefully'.",
+                            whyWrong: "more careful dùng sai từ loại tính từ cho động từ thường. more carelessly nghĩa là lái xe ẩu hơn - không phù hợp lời khuyên an toàn giao thông."
+                        }
+                    },
+                    {
+                        qText: "My house is _______ hers.",
+                        options: ["cheap than", "cheaper", "more cheap than", "cheaper than"],
+                        correct: "cheaper than",
+                        explain: {
+                            trans: "A. cheap than; B. cheaper; C. more cheap than; D. cheaper than.",
+                            transQ: "Căn nhà nhỏ của gia đình tôi thì rẻ tiền hơn căn biệt thự to lớn của cô ấy.",
+                            whyCorrect: "Cheap là tính từ ngắn 1 âm tiết, cấu trúc so sánh hơn hoàn chỉnh bắt buộc phải thêm đuôi '-er' đi kèm từ so sánh 'than' đằng sau: 'cheaper than'.",
+                            whyWrong: "Thiếu từ so sánh 'than' ở phương án B hoặc dùng sai từ 'more cheap' của phương án C."
+                        }
+                    },
+                    {
+                        qText: "Tom is _______ than David.",
+                        options: ["handsome", "the more handsome", "more handsome", "the most handsome"],
+                        correct: "more handsome",
+                        explain: {
+                            trans: "A. handsome; B. the more handsome; C. more handsome; D. the most handsome.",
+                            transQ: "Bạn Tom trông đẹp trai, khôi ngô tuấn tú hơn bạn David.",
+                            whyCorrect: "Handsome là tính từ dài hai âm tiết thông thường, cấu sánh hơn với đối tượng khác qua từ 'than' đòi hỏi cấu trúc 'more + adj dài': 'more handsome'.",
+                            whyWrong: "the most handsome dùng cho so sánh nhất từ 3 người trở lên; không thêm mạo từ 'the' cho so sánh hơn thông thường ở phương án B."
+                        }
+                    },
+                    {
+                        qText: "He did the test _______ I did.",
+                        options: ["as bad as", "badder than", "more badly than", "worse than"],
+                        correct: "worse than",
+                        explain: {
+                            trans: "A. as bad as; B. badder than; C. more badly than; D. worse than.",
+                            transQ: "Anh ấy đã làm bài kiểm tra điểm số tồi tệ hơn tôi đã làm.",
+                            whyCorrect: "Động từ 'did' (làm bài) cần bổ nghĩa bởi trạng từ 'badly'. Dạng so sánh hơn bất quy tắc của trạng từ 'badly' biến đổi đặc biệt thành 'worse' đi cùng từ so sánh 'than'.",
+                            whyWrong: "Không tồn tại từ 'badder' trong tiếng Anh học thuật chính quy."
+                        }
+                    },
+                    {
+                        qText: "My new sofa is _______ than the old one.",
+                        options: ["more comfortable", "comfortably", "more comfortabler", "comfortable"],
+                        correct: "more comfortable",
+                        explain: {
+                            trans: "A. more comfortable (êm ái hơn); B. comfortably (trạng từ); C. more comfortabler (sai từ); D. comfortable (tính từ).",
+                            transQ: "Chiếc ghế sofa mới mua của nhà tôi ngồi êm ái thoải mái hơn nhiều so với cái cũ rách.",
+                            whyCorrect: "Comfortable là tính từ dài có 4 âm tiết, cấu trúc so sánh hơn bắt buộc dùng thêm từ 'more' đứng đằng trước tính từ nguyên bản: 'more comfortable'.",
+                            whyWrong: "Không kết hợp vừa thêm 'more' vừa thêm đuôi '-er' ở tính từ dài (more comfortabler là sai lỗi ngữ pháp nghiêm trọng)."
+                        }
+                    },
+                    {
+                        qText: "He walked _________ home after a long working day.",
+                        options: ["tire", "tiredness", "tired", "tiredly"],
+                        correct: "tiredly",
+                        explain: {
+                            trans: "A. tire (động từ mệt); B. tiredness (nỗi mệt mỏi - n); C. tired (mệt mỏi - adj); D. tiredly (một cách mệt mỏi - adv).",
+                            transQ: "Anh ấy bước đi những bước uể oải về nhà sau một ngày dài làm việc căng thẳng bận rộn ở cơ quan.",
+                            whyCorrect: "Động từ bước đi di chuyển 'walked' cần đi cùng trạng từ để diễn tả cách thức di chuyển mỏi mệt lê từng bước chân: 'tiredly'.",
+                            whyWrong: "tired là tính từ chỉ dùng mô tả cảm xúc sau liên động từ hoặc tobe, không dùng trực tiếp sau động từ hành động thường."
+                        }
+                    },
+                    {
+                        qText: "You can travel _________ in the city than in the countryside.",
+                        options: ["convenient", "conveniently", "more convenient", "more conveniently"],
+                        correct: "more conveniently",
+                        explain: {
+                            trans: "A. convenient (adj); B. conveniently (adv); C. more convenient; D. more conveniently.",
+                            transQ: "Bạn có thể di chuyển đi lại thuận tiện, dễ dàng hơn ở trong thành phố so với ở vùng quê thưa thớt bóng người.",
+                            whyCorrect: "Động từ di chuyển đi lại 'travel' yêu cầu trạng từ để bổ trợ cách thức di chuyển 'conveniently'. Do có từ so sánh 'than' nên dùng dạng so sánh hơn 'more conveniently'.",
+                            whyWrong: "more convenient dùng tính từ sai ngữ pháp vì không bổ nghĩa cho động từ di chuyển hành động thường."
+                        }
+                    },
+                    {
+                        qText: "We are looking forward to a bumper _______.",
+                        options: ["lighthouse", "village", "countryside", "crop"],
+                        correct: "crop",
+                        explain: {
+                            trans: "A. lighthouse (hải đăng); B. village (ngôi làng); C. countryside (quê hương); D. crop (mùa màng thu hoạch).",
+                            transQ: "Chúng tôi đang vô cùng mong đợi một mùa màng bội thu hoa quả thóc lúa đầy nhà kho.",
+                            whyCorrect: "Cụm danh từ ghép cố định trong tiếng Anh: 'a bumper crop' dùng để chỉ một vụ mùa bội thu, năng suất cực cao vượt mức mong đợi của người nông dân.",
+                            whyWrong: "Không thể thu hoạch hải đăng hay thu hoạch nông thôn."
+                        }
+                    },
+                    {
+                        qText: "I used to go _______ buffaloes when I was small.",
+                        options: ["herding", "swimming", "hiking", "cooking"],
+                        correct: "herding",
+                        explain: {
+                            trans: "A. herding (chăn trâu); B. swimming (bơi lội); C. hiking (leo núi); D. cooking (nấu ăn).",
+                            transQ: "Tôi thường hay đi chăn trâu cắt cỏ dắt bò gặm cỏ khi tôi còn là một đứa trẻ sống ở quê hương.",
+                            whyCorrect: "Cụm từ chỉ hành động nông thôn kinh điển: 'go herding buffaloes' nghĩa là đi dắt trâu bò ra đồng gặm cỏ chăn thả tự do.",
+                            whyWrong: "Không thể leo núi trâu hay nấu nướng con trâu đi chơi."
+                        }
+                    },
+                    {
+                        qText: "They _______ the boxes into the trucks.",
+                        options: ["harvested", "loaded", "caught", "observed"],
+                        correct: "loaded",
+                        explain: {
+                            trans: "A. harvested (thu hoạch lúa); B. loaded (chất hàng xếp hàng); C. caught (bắt cá); D. observed (quan sát trông coi).",
+                            transQ: "Họ cùng nhau khênh chất xếp những chiếc hộp các-tông nặng nề lên trên thùng xe tải.",
+                            whyCorrect: "Hành động khuân xếp sắp đặt các thùng hàng hóa lên trên xe tải thồ gọi là bốc hàng 'load something into/onto'.",
+                            whyWrong: "Bắt cá catch hay thu hoạch lúa harvest không đi với danh từ hộp các tông thồ xe tải."
+                        }
+                    },
+                    {
+                        qText: "_______ is often the hardest but the most important time to people living in the countryside.",
+                        options: ["Tet holiday", "Harvest time", "Daylight", "Travelling time"],
+                        correct: "Harvest time",
+                        explain: {
+                            trans: "A. Tet holiday (ngày Tết); B. Harvest time (mùa gặt vụ thu hoạch); C. Daylight (ánh sáng ban ngày); D. Travelling time (thời gian du lịch).",
+                            transQ: "_________ thường là khoảng thời gian vất vả cực nhọc nhất nhưng lại là quan trọng nhất đối với những người nông dân sinh sống ở nông thôn.",
+                            whyCorrect: "Vụ mùa thu hoạch gặt hái lúa thóc (Harvest time) là lúc người nông dân phải bán lưng cho trời bán mặt cho đất làm việc cật lực để thu hồi quả ngọt công sức cả năm.",
+                            whyWrong: "Kỳ nghỉ Tết là khoảng thời gian vui chơi sum họp gia đình ấm áp nhàn rỗi không phải lao động cực nhọc."
+                        }
+                    },
+                    {
+                        qText: "John invited Ann to join his family on _______ to his home village about 60 kilometers to the north of Ha Noi.",
+                        options: ["a two-day trip", "two- days trip", "a two- days trip", "a trip two days"],
+                        correct: "a two-day trip",
+                        explain: {
+                            trans: "A. a two-day trip (chuyến đi hai ngày); B. hai ngày không gạch nối; C. dư kí tự s số nhiều ở danh từ ghép; D. sai cấu trúc trật tự từ.",
+                            transQ: "John đã mời Ann tham gia cùng gia đình anh ấy trong một chuyến đi chơi hai ngày về thăm ngôi quê tổ tiên cách phía bắc Hà Nội khoảng 60 cây số.",
+                            whyCorrect: "Quy tắc ngữ pháp về danh từ ghép chỉ thời gian làm tính từ bổ nghĩa: 'a + số đếm - danh từ số ít (gạch nối) + danh từ chính'. Do đó viết đúng chính tả là 'a two-day trip' (không thêm 's' vào từ day).",
+                            whyWrong: "Viết có s như two-days là sai nguyên tắc thành lập tính từ ghép bổ nghĩa."
+                        }
+                    },
+                    {
+                        qText: "Students in this school study _________ than students in that school.",
+                        options: ["more hardly", "harder", "hard", "hardly"],
+                        correct: "harder",
+                        explain: {
+                            trans: "A. more hardly; B. harder; C. hard; D. hardly.",
+                            transQ: "Học sinh ở ngôi trường này học tập chăm chỉ và nỗ lực hơn học sinh ở ngôi trường bên cạnh.",
+                            whyCorrect: "Hard vừa là tính từ vừa là trạng từ ngắn đặc biệt. Khi chuyển sang so sánh hơn bổ nghĩa cho động từ 'study', ta thêm trực tiếp đuôi '-er' tạo thành 'harder'.",
+                            whyWrong: "'Hardly' mang nghĩa hoàn toàn khác biệt là 'hầu như không' chứ không phải là chăm chỉ, nên 'more hardly' là sai nghĩa."
+                        }
+                    },
+                    {
+                        qText: "In my family, my father cooks _________ than my mother does.",
+                        options: ["better", "best", "well", "good"],
+                        correct: "better",
+                        explain: {
+                            trans: "A. better; B. best; C. well; D. good.",
+                            transQ: "Trong gia đình thân yêu của tôi, bố tôi nấu ăn ngon hơn mẹ tôi nấu.",
+                            whyCorrect: "Động từ nấu ăn 'cooks' cần trạng từ bổ trợ. Trạng từ chỉ mức độ tốt là 'well'. Chuyển sang so sánh hơn với từ so sánh 'than' biến đổi thành trạng từ bất quy tắc 'better'.",
+                            whyWrong: "good là tính từ không đi kèm bổ trợ động từ thường cooks; best dùng trong so sánh nhất."
+                        }
+                    }
+                ]
+            },
+            "exercise-5": {
+                title: "Exercise 5: Fill in the blanks with the comparative form of the adverbs",
+                type: "gapfill",
+                questions: [
+                    { text: "My aunt sings [well] than my uncle does.", choices: ["better", "well", "more well", "worse"], correct: "better", itemIndex: 1 },
+                    { text: "She cooks [badly] than her sister. I couldn't eat what she cooked.", choices: ["worse", "badly", "more badly", "better"], correct: "worse", itemIndex: 2 },
+                    { text: "No one in the team runs [fast] than Linh.", choices: ["faster", "fast", "more fast", "fastest"], correct: "faster", itemIndex: 3 },
+                    { text: "He drives [carefully] than his father.", choices: ["more carefully", "carefully", "carefuler", "less carefully"], correct: "more carefully", itemIndex: 4 },
+                    { text: "Yesterday my teacher came to class [early] than usual.", choices: ["earlier", "early", "more early", "earliest"], correct: "earlier", itemIndex: 5 },
+                    { text: "I speak English [fluently] than my sister.", choices: ["more fluently", "fluently", "fluentlier", "most fluently"], correct: "more fluently", itemIndex: 6 },
+                    { text: "She coloured the picture [perfectly] than I expected.", choices: ["more perfectly", "perfectly", "perfectlier", "most perfectly"], correct: "more perfectly", itemIndex: 7 },
+                    { text: "The little child talked to his grandmother [politely] than other children.", choices: ["more politely", "politely", "politelier", "less politely"], correct: "more politely", itemIndex: 8 },
+                    { text: "She painted the picture [beautifully] than I did.", choices: ["more beautifully", "beautifully", "beautifullier", "better beautifully"], correct: "more beautifully", itemIndex: 9 },
+                    { text: "Nam runs [quickly] than other members of the team.", choices: ["more quickly", "quickly", "quicklier", "faster"], correct: "more quickly", itemIndex: 10 }
+                ]
+            },
+            "exercise-6": {
+                title: "Exercise 6: Match the pictures with the correct words or phrases",
+                type: "matching",
+                questions: [
+                    { id: 1, label: "combine harvester", correct: "combine harvester", graphic: "combine_harvester" },
+                    { id: 2, label: "buffalo", correct: "buffalo", graphic: "buffalo" },
+                    { id: 3, label: "drying rice", correct: "drying rice", graphic: "drying_rice" },
+                    { id: 4, label: "paddy fields", correct: "paddy fields", graphic: "paddy_fields" },
+                    { id: 5, label: "picking fruits", correct: "picking fruits", graphic: "picking_fruits" },
+                    { id: 6, label: "small village", correct: "small village", graphic: "small_village" },
+                    { id: 7, label: "milking cow", correct: "milking cow", graphic: "milking_cow" }
+                ]
+            },
+            "exercise-7": {
+                title: "Exercise 7: Choose the word CLOSEST in meaning to the underlined word",
+                type: "mcq",
+                questions: [
+                    {
+                        qText: "Nomadic people live in a <u>ger</u>. It keeps them cool in summer and warm in winter.",
+                        options: ["house", "circular tent", "cave", "yacht"],
+                        correct: "circular tent",
+                        explain: {
+                            trans: "A. house (ngôi nhà bình thường); B. circular tent (lều tròn di động của dân du mục); C. cave (hang động); D. yacht (du thuyền sang trọng).",
+                            transQ: "Người du mục sinh sống trong một ngôi lều tròn (ger). Nó giúp họ mát mẻ vào mùa hè và ấm áp vào mùa đông lạnh giá.",
+                            whyCorrect: "Ger là tên gọi truyền thống của ngôi lều tròn có khung gỗ bọc nỉ da đặc trưng của dân du mục vùng thảo nguyên Mông Cổ thích hợp tháo dỡ di chuyển, do đó đồng nghĩa với 'circular tent'.",
+                            whyWrong: "Nhà kiên cố hay hang động hoàn toàn không miêu tả đúng bản chất di động linh hoạt của lều ger."
+                        }
+                    },
+                    {
+                        qText: "The nomads move two or three times a year to look for new <u>pastures</u>.",
+                        options: ["food", "places", "grasslands", "lifestyles"],
+                        correct: "grasslands",
+                        explain: {
+                            trans: "A. food (thức ăn); B. places (nơi chốn); C. grasslands (đồng cỏ xanh); D. lifestyles (lối sống phong cách).",
+                            transQ: "Dân du mục di chuyển hai đến ba lần một năm để tìm kiếm những đồng cỏ mới chăn thả gia súc béo tốt.",
+                            whyCorrect: "'Pasture' có nghĩa gốc là đồng cỏ dùng để chăn thả trực tiếp đàn gia súc gặm cỏ tươi, đồng nghĩa sát nhất với 'grasslands'.",
+                            whyWrong: "Mặc dù họ tìm đồ ăn thức uống cho vật nuôi nhưng đồng cỏ chăn thả gặm cỏ tươi xanh trực tiếp là nghĩa chuẩn xác nhất."
+                        }
+                    },
+                    {
+                        qText: "Life in the city is more <u>exciting</u> than in the country.",
+                        options: ["boring", "interesting", "convenient", "beautiful"],
+                        correct: "interesting",
+                        explain: {
+                            trans: "A. boring (buồn chán tẻ nhạt); B. interesting (thú vị kích thích trí tò mò); C. convenient (thuận tiện); D. beautiful (xinh đẹp).",
+                            transQ: "Cuộc sống náo nhiệt sôi động ở thành phố lớn thì thú vị và sôi động hơn ở vùng nông thôn.",
+                            whyCorrect: "'Exciting' mang ý nghĩa là sôi động đầy hứng khởi, thú vị kích thích tinh thần vui tươi năng động, tương đồng cao nhất với từ 'interesting'.",
+                            whyWrong: "Boring là từ trái nghĩa hoàn toàn."
+                        }
+                    },
+                    {
+                        qText: "That village is very <u>peaceful</u>, so we like to live there.",
+                        options: ["noisy", "quiet", "boring", "skillful"],
+                        correct: "quiet",
+                        explain: {
+                            trans: "A. noisy (ồn ào nhốn nháo); B. quiet (yên tĩnh, thanh tĩnh); C. boring (tẻ nhạt buồn chán); D. skillful (khéo léo khéo tay).",
+                            transQ: "Ngôi làng quê đó vô cùng yên bình thanh tĩnh, vì thế chúng tôi rất mong muốn được sinh sống tại đây lâu dài.",
+                            whyCorrect: "'Peaceful' nghĩa là thanh bình, không có ồn ào khói bụi hay tranh chấp xô bồ, tương tự với trạng thái 'quiet' (yên tĩnh tĩnh lặng mát mẻ).",
+                            whyWrong: "Noisy là tính từ trái nghĩa đối lập hoàn toàn."
+                        }
+                    },
+                    {
+                        qText: "I <u>don't like</u> living in the country.",
+                        options: ["dislike", "hate", "enjoy", "dislike & hate"],
+                        correct: "dislike & hate",
+                        explain: {
+                            trans: "A. dislike (không thích); B. hate (ghét cay ghét đắng); C. enjoy (thích thú tận hưởng); D. dislike & hate (cả A và B đều đúng hoàn hảo ngữ cảnh).",
+                            transQ: "Tôi không hề ưa thích việc sinh sống làm ăn sinh hoạt ở vùng nông thôn hẻo lánh chút nào.",
+                            whyCorrect: "'Don't like' biểu đạt sự không thích hoặc ghét bỏ nhẹ một sự việc nào đó, do đó cả hai sắc thái 'dislike' và 'hate' đều phù hợp để thay thế truyền tải thông điệp không muốn sống ở đây.",
+                            whyWrong: "Enjoy là từ mang nghĩa tích cực ngược lại hoàn toàn mong muốn ghét bỏ."
+                        }
+                    }
+                ]
+            },
+            "exercise-8": {
+                title: "Exercise 8: Choose the word OPPOSITE in meaning to the underlined word",
+                type: "mcq",
+                questions: [
+                    {
+                        qText: "The life in the countryside is very <u>quiet</u> and relaxing.",
+                        options: ["noisy", "exciting", "modern", "hard"],
+                        correct: "noisy",
+                        explain: {
+                            trans: "A. noisy (ồn ào náo động); B. exciting (sôi động thú vị); C. modern (hiện đại sầm uất); D. hard (vất vả gian truân).",
+                            transQ: "Cuộc sống ở vùng nông thôn làng mạc thì vô cùng yên tĩnh tĩnh lặng và thư thái đầu óc.",
+                            whyCorrect: "Từ trái nghĩa trực tiếp của sự yên bình tĩnh lặng 'quiet' là sự ồn ào nhốn nháo xô bồ náo động còi xe 'noisy'.",
+                            whyWrong: "Các phương án khác không biểu thị trạng thái âm thanh đối nghịch trực diện của không gian tĩnh lặng."
+                        }
+                    },
+                    {
+                        qText: "City people seem to react more <u>quickly</u> to changes than country people.",
+                        options: ["noisy", "slow", "slowly", "fast"],
+                        correct: "slowly",
+                        explain: {
+                            trans: "A. noisy (ồn ào); B. slow (chậm chạp - adj); C. slowly (một cách chậm chạp - adv); D. fast (nhanh chóng).",
+                            transQ: "Người dân sinh sống ở thành phố lớn dường như phản ứng nhanh chóng và nhạy bén hơn với các thay đổi công nghệ so với người dân vùng nông thôn thôn dã.",
+                            whyCorrect: "Từ gạch chân 'quickly' là trạng từ (adv), do đó từ trái nghĩa tương ứng bắt buộc phải là một trạng từ đối lập tốc độ hành vi là 'slowly' (một cách chậm rãi chây ì chậm chạp).",
+                            whyWrong: "slow là tính từ sai từ loại ngữ pháp khi so sánh trực tiếp với phó từ gạch chân."
+                        }
+                    },
+                    {
+                        qText: "A buffalo ploughs <u>better</u> than a horse.",
+                        options: ["well", "bad", "badly", "worse"],
+                        correct: "worse",
+                        explain: {
+                            trans: "A. well (tốt); B. bad (tệ); C. badly (một cách tồi tệ); D. worse (tệ hơn kém hơn).",
+                            transQ: "Một con trâu khỏe mạnh cày cấy ruộng đất tốt hơn nhiều so với một chú ngựa chạy đua.",
+                            whyCorrect: "'Better' là phó từ so sánh hơn bất quy tắc của well. Từ trái nghĩa so sánh hơn của tệ hơn kém cỏi hơn là trạng từ bất quy tắc 'worse'.",
+                            whyWrong: "badly là phó từ thường chưa biến đổi dạng thức so sánh hơn tương thích với cấu trúc của better."
+                        }
+                    },
+                    {
+                        qText: "This exercise is more <u>difficult</u> than that one.",
+                        options: ["easy", "boring", "good", "easily"],
+                        correct: "easy",
+                        explain: {
+                            trans: "A. easy (dễ dàng đơn giản); B. boring (tẻ nhạt chán ngán); C. good (tốt đẹp); D. easily (một cách dễ dàng).",
+                            transQ: "Bài tập rèn luyện nâng cao này khó giải hơn nhiều so với bài tập cơ bản đằng kia.",
+                            whyCorrect: "Từ gạch chân 'difficult' đóng vai trò tính từ miêu tả độ khó, do đó từ trái nghĩa tương thích tính chất là tính từ chỉ độ dễ dàng 'easy'.",
+                            whyWrong: "easily là trạng từ phó từ sai từ loại cấu trúc so khớp trực tiếp tính từ difficult."
+                        }
+                    },
+                    {
+                        qText: "Life in the city is <u>more convenient</u> and exciting than life in the country.",
+                        options: ["inconvenient", "more inconvenient", "slow", "dislike & hate"],
+                        correct: "more inconvenient",
+                        explain: {
+                            trans: "A. inconvenient (bất tiện); B. more inconvenient (bất tiện hơn); C. slow (chậm chạp); D. dislike & hate.",
+                            transQ: "Cuộc sống ở trung tâm đô thị thì tiện nghi, thuận tiện và sôi động hơn nhiều so với cuộc sống ở nông thôn hoang sơ.",
+                            whyCorrect: "Dạng so sánh hơn của cụm đối lập 'more convenient' (tiện lợi hơn) là cụm 'more inconvenient' (bất tiện hơn nhiều lần).",
+                            whyWrong: "inconvenient là tính từ nguyên bản thiếu phó từ chỉ mức độ so sánh hơn 'more' tương thích cấu trúc đề bài."
+                        }
+                    }
+                ]
+            }
+        };
+
+        // RENDER EXERCISES & TABS DYNAMICALLY TO AVOID OMISSION
+        function initApp() {
+            const tabsNav = document.getElementById("exercise-tabs");
+            const container = document.getElementById("exercises-container");
+            
+            let tabIndex = 1;
+            for (const key in examData) {
+                const ex = examData[key];
+                
+                // Render Tab button
+                const btn = document.createElement("button");
+                btn.className = `tab-btn ${tabIndex === 1 ? 'active' : ''}`;
+                btn.id = `tab-btn-${key}`;
+                btn.innerHTML = `<i class="fa-solid fa-star-and-crescent"></i> Phần ${tabIndex}: ${ex.title.split(":")[0]}`;
+                btn.onclick = () => switchTab(key);
+                tabsNav.appendChild(btn);
+
+                // Render Section Container
+                const section = document.createElement("section");
+                section.className = `exercise-section ${tabIndex === 1 ? 'active' : ''}`;
+                section.id = `sec-${key}`;
+                
+                const title = document.createElement("h2");
+                title.className = "exercise-title";
+                title.innerText = ex.title;
+                section.appendChild(title);
+
+                // Build questions inside based on types
+                if (ex.type === "mcq") {
+                    ex.questions.forEach((q, qIdx) => {
+                        const card = document.createElement("div");
+                        card.className = "question-card";
+                        card.id = `q-${key}-${qIdx}`;
+
+                        const num = document.createElement("span");
+                        num.className = "question-num";
+                        num.innerText = `Câu ${qIdx + 1}`;
+                        card.appendChild(num);
+
+                        const text = document.createElement("div");
+                        text.className = "question-text";
+                        text.innerHTML = q.qText;
+                        card.appendChild(text);
+
+                        // If visual sign or phone required (Q29, Q30 of Exercise 4)
+                        if (key === "exercise-4" && qIdx === 28) { // Index 28 is Q29 (ancient / sale sign context)
+                            const sign = document.createElement("div");
+                            sign.className = "css-sale-sign";
+                            sign.innerHTML = `<div class="sale-text">SALE 50%</div><div class="sale-sub">TODAY ONLY</div>`;
+                            card.appendChild(sign);
+                        } else if (key === "exercise-4" && qIdx === 29) { // Index 29 is Q30 (combine harvester / phone chat context)
+                            const phone = document.createElement("div");
+                            phone.className = "phone-mockup";
+                            phone.innerHTML = `
+                                <div class="phone-header"><i class="fa-solid fa-user"></i> Aly Family</div>
+                                <div class="phone-messages">
+                                    <div class="msg-bubble received">Hi John!</div>
+                                    <div class="msg-bubble sent">We harvested rice by machine!</div>
+                                </div>
+                            `;
+                            card.appendChild(phone);
+                        }
+
+                        const grid = document.createElement("div");
+                        grid.className = "options-grid";
+
+                        // Shuffling options to stimulate memory as requested
+                        const shuffledOpts = [...q.options];
+                        shuffledOpts.sort(() => Math.random() - 0.5);
+
+                        shuffledOpts.forEach(opt => {
+                            const optBtn = document.createElement("button");
+                            optBtn.className = "option-btn";
+                            optBtn.innerText = opt;
+                            optBtn.onclick = () => checkMCQAnswer(key, qIdx, opt, optBtn, card);
+                            grid.appendChild(optBtn);
+                        });
+
+                        card.appendChild(grid);
+
+                        // Add Explanation placeholder box below
+                        const expBox = document.createElement("div");
+                        expBox.className = "explanation-box";
+                        expBox.id = `exp-${key}-${qIdx}`;
+                        expBox.innerHTML = `
+                            <div class="explanation-header">👩‍🏫 Cô Lê Hằng Giải Thích Siêu Chi Tiết:</div>
+                            <div class="explanation-body">
+                                <div class="explanation-step">
+                                    <div class="step-title">📍 Dịch câu hỏi & Phân tích đáp án:</div>
+                                    <p>${q.explain.transQ}</p>
+                                    <p><strong>Chi tiết:</strong> ${q.explain.trans}</p>
+                                </div>
+                                <div class="explanation-step">
+                                    <div class="step-title">✅ Tại sao chọn đúng?</div>
+                                    <p>${q.explain.whyCorrect}</p>
+                                </div>
+                                <div class="explanation-step">
+                                    <div class="step-title">❌ Tại sao các đáp án khác sai?</div>
+                                    <p>${q.explain.whyWrong}</p>
+                                </div>
+                            </div>
+                        `;
+                        card.appendChild(expBox);
+                        section.appendChild(card);
+                    });
+                } else if (ex.type === "gapfill") {
+                    // Gap filling exercises
+                    ex.questions.forEach((q, qIdx) => {
+                        const card = document.createElement("div");
+                        card.className = "question-card";
+                        card.id = `q-${key}-${qIdx}`;
+
+                        const num = document.createElement("span");
+                        num.className = "question-num";
+                        num.innerText = `Câu ${qIdx + 1}`;
+                        card.appendChild(num);
+
+                        const text = document.createElement("div");
+                        text.className = "question-text";
+                        
+                        // Replace [bracketed] words with a clickable gap-fill button
+                        const regex = /\[(.*?)\]/;
+                        const matches = q.text.match(regex);
+                        let processedText = q.text;
+                        if (matches) {
+                            const btnHtml = `<button class="blank-btn" id="blank-${key}-${qIdx}" onclick="openGapFillSelector('${key}', ${qIdx}, '${q.correct}')">Click để chọn từ ...</button>`;
+                            processedText = q.text.replace(regex, btnHtml);
+                        }
+                        text.innerHTML = processedText;
+                        card.appendChild(text);
+
+                        // Explanation Box for Gap Fill
+                        const expBox = document.createElement("div");
+                        expBox.className = "explanation-box";
+                        expBox.id = `exp-${key}-${qIdx}`;
+                        expBox.innerHTML = `
+                            <div class="explanation-header">👩‍🏫 Cô Lê Hằng Giải Thích Siêu Chi Tiết:</div>
+                            <div class="explanation-body">
+                                <div class="explanation-step">
+                                    <div class="step-title">📍 Phân tích cú pháp So Sánh Trạng Từ:</div>
+                                    <p>Từ cần điền là dạng so sánh hơn của phó từ (trạng từ) trong ngoặc đơn để phù hợp cấu trúc so sánh hơn có 'than'.</p>
+                                    <p><strong>Đáp án đúng:</strong> <span style='color: var(--correct-green); font-weight: bold;'>${q.correct}</span></p>
+                                </div>
+                                <div class="explanation-step">
+                                    <div class="step-title">💡 Gợi ý học thuộc:</div>
+                                    <p>Ghi chép cấu trúc so sánh trạng từ dài (more + trạng từ dài) và trạng từ ngắn đặc biệt (fast -> faster, early -> earlier, well -> better, badly -> worse) vào vở ngay nhé con!</p>
+                                </div>
+                            </div>
+                        `;
+                        card.appendChild(expBox);
+                        section.appendChild(card);
+                    });
+                } else if (ex.type === "matching") {
+                    // Matching graphic grid with gorgeous SVGs
+                    const grid = document.createElement("div");
+                    grid.className = "matching-grid";
+
+                    ex.questions.forEach((q, qIdx) => {
+                        const card = document.createElement("div");
+                        card.className = "matching-card";
+                        card.id = `matching-card-${q.id}`;
+
+                        // Custom Visual SVG Render engine based on keywords
+                        const graphicBox = document.createElement("div");
+                        graphicBox.className = "graphic-container";
+                        graphicBox.innerHTML = drawVisualSVG(q.graphic);
+                        card.appendChild(graphicBox);
+
+                        const select = document.createElement("select");
+                        select.className = "matching-select";
+                        select.id = `match-select-${q.id}`;
+                        select.onchange = () => checkMatchingAnswer(q.id, select.value, q.correct, card);
+
+                        // Build selection options containing all labels scrambled
+                        const defaultOpt = document.createElement("option");
+                        defaultOpt.text = "Ghép cụm từ đúng...";
+                        defaultOpt.value = "";
+                        select.appendChild(defaultOpt);
+
+                        const matchLabels = ex.questions.map(item => item.label);
+                        matchLabels.sort(() => Math.random() - 0.5);
+                        matchLabels.forEach(lbl => {
+                            const opt = document.createElement("option");
+                            opt.text = lbl;
+                            opt.value = lbl;
+                            select.appendChild(opt);
+                        });
+
+                        card.appendChild(select);
+                        grid.appendChild(card);
+                    });
+                    section.appendChild(grid);
+                }
+
+                container.appendChild(section);
+                tabIndex++;
+            }
+
+            // Append Extra Exercises dynamically: Exercises 9, 10, 11, 12, 13, 14, 15
+            appendExtraExercises();
+            updateProgress();
+        }
+
+        // DYNAMIC CSS/SVG ARTWORK GENERATOR
+        function drawVisualSVG(type) {
+            switch(type) {
+                case "combine_harvester":
+                    return `
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <rect x="20" y="30" width="50" height="35" rx="5" fill="#FF4757"/>
+                        <circle cx="35" cy="70" r="12" fill="#2C3E50" stroke="#FFF" stroke-width="2"/>
+                        <circle cx="65" cy="70" r="12" fill="#2C3E50" stroke="#FFF" stroke-width="2"/>
+                        <circle cx="35" cy="70" r="4" fill="#BDC3C7"/>
+                        <circle cx="65" cy="70" r="4" fill="#BDC3C7"/>
+                        <path d="M70 45 L85 55 L70 60 Z" fill="#F1C40F"/>
+                        <rect x="25" y="20" width="20" height="15" fill="#3498DB" opacity="0.8"/>
+                    </svg>`;
+                case "buffalo":
+                    return `
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <ellipse cx="50" cy="55" rx="25" ry="20" fill="#7F8C8D"/>
+                        <circle cx="50" cy="35" r="14" fill="#7F8C8D"/>
+                        <path d="M35 25 Q20 20 25 35 Q30 35 38 32" fill="#BDC3C7" stroke="#2C3E50" stroke-width="2"/>
+                        <path d="M65 25 Q80 20 75 35 Q70 35 62 32" fill="#BDC3C7" stroke="#2C3E50" stroke-width="2"/>
+                        <rect x="35" y="70" width="8" height="15" fill="#7F8C8D"/>
+                        <rect x="57" y="70" width="8" height="15" fill="#7F8C8D"/>
+                        <circle cx="45" cy="32" r="2" fill="#000"/>
+                        <circle cx="55" cy="32" r="2" fill="#000"/>
+                    </svg>`;
+                case "drying_rice":
+                    return `
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <circle cx="50" cy="25" r="15" fill="#FF9F43"/>
+                        <line x1="50" y1="5" x2="50" y2="10" stroke="#FF9F43" stroke-width="3"/>
+                        <line x1="50" y1="40" x2="50" y2="45" stroke="#FF9F43" stroke-width="3"/>
+                        <line x1="30" y1="25" x2="25" y2="25" stroke="#FF9F43" stroke-width="3"/>
+                        <line x1="70" y1="25" x2="75" y2="25" stroke="#FF9F43" stroke-width="3"/>
+                        <ellipse cx="30" cy="75" rx="15" ry="8" fill="#F1C40F"/>
+                        <ellipse cx="50" cy="80" rx="18" ry="10" fill="#F39C12"/>
+                        <ellipse cx="70" cy="75" rx="15" ry="8" fill="#F1C40F"/>
+                    </svg>`;
+                case "paddy_fields":
+                    return `
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <path d="M 0 90 Q 25 70 50 90 T 100 90 L 100 100 L 0 100 Z" fill="#2ECC71"/>
+                        <path d="M 0 70 Q 25 55 50 70 T 100 70 L 100 100 L 0 100 Z" fill="#27AE60"/>
+                        <path d="M 0 50 Q 25 40 50 50 T 100 50 L 100 100 L 0 100 Z" fill="#219A52"/>
+                        <path d="M 20 60 L 20 45" stroke="#F1C40F" stroke-width="3"/>
+                        <path d="M 40 55 L 40 40" stroke="#F1C40F" stroke-width="3"/>
+                        <path d="M 60 58 L 60 42" stroke="#F1C40F" stroke-width="3"/>
+                    </svg>`;
+                case "picking_fruits":
+                    return `
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <rect x="45" y="50" width="10" height="40" fill="#8B4513"/>
+                        <circle cx="50" cy="45" r="25" fill="#2ECC71"/>
+                        <circle cx="35" cy="40" r="5" fill="#FF4757"/>
+                        <circle cx="65" cy="45" r="5" fill="#FF4757"/>
+                        <circle cx="50" cy="30" r="5" fill="#FF4757"/>
+                        <rect x="35" y="75" width="30" height="15" rx="3" fill="#D2B48C"/>
+                        <line x1="35" y1="75" x2="65" y2="90" stroke="#8B4513"/>
+                    </svg>`;
+                case "small_village":
+                    return `
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <rect x="15" y="55" width="25" height="25" fill="#F1C40F" rx="3"/>
+                        <polygon points="10,55 27,35 45,55" fill="#E74C3C"/>
+                        <rect x="23" y="65" width="8" height="15" fill="#8B4513"/>
+                        <rect x="55" y="50" width="30" height="30" fill="#E8A7A1" rx="3"/>
+                        <polygon points="50,50 70,30 90,50" fill="#C0392B"/>
+                    </svg>`;
+                case "milking_cow":
+                    return `
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <ellipse cx="50" cy="50" rx="28" ry="18" fill="#FFF" stroke="#2C3E50" stroke-width="3"/>
+                        <circle cx="40" cy="42" r="5" fill="#000"/>
+                        <circle cx="60" cy="52" r="7" fill="#000"/>
+                        <circle cx="52" cy="48" r="4" fill="#000"/>
+                        <ellipse cx="45" cy="65" rx="8" ry="6" fill="#FFC0CB"/>
+                        <rect x="42" y="68" width="2" height="5" fill="#FFC0CB"/>
+                        <rect x="47" y="68" width="2" height="5" fill="#FFC0CB"/>
+                        <rect x="65" y="75" width="15" height="15" fill="#BDC3C7"/>
+                    </svg>`;
+            }
+        }
+
+        // SWITCH EXERCISE TABS
+        function switchTab(key) {
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(".exercise-section").forEach(sec => sec.classList.remove("active"));
+            
+            document.getElementById(`tab-btn-${key}`).classList.add("active");
+            document.getElementById(`sec-${key}`).classList.add("active");
+            playSound('correct');
+        }
+
+        // GLOBALLY PERSISTED APP STATES
+        let currentPoints = 0;
+        let totalAnswered = 0;
+        const correctAnswersTracker = {};
+
+        function checkMCQAnswer(exKey, qIdx, selectedOpt, optBtn, card) {
+            // Prevent multiple clicks
+            const siblings = card.querySelectorAll(".option-btn");
+            siblings.forEach(btn => btn.disabled = true);
+
+            const q = examData[exKey].questions[qIdx];
+            const isCorrect = selectedOpt === q.correct;
+            const expBox = card.querySelector(".explanation-box");
+
+            if (isCorrect) {
+                optBtn.classList.add("correct");
+                card.classList.add("answered-correct");
+                playSound('correct');
+                triggerConfetti();
+                currentPoints += 10;
+                correctAnswersTracker[`${exKey}-${qIdx}`] = true;
+            } else {
+                optBtn.classList.add("wrong");
+                optBtn.classList.add("shake");
+                card.classList.add("answered-wrong");
+                playSound('wrong');
+                correctAnswersTracker[`${exKey}-${qIdx}`] = false;
+
+                // Light up the correct option to help student memorize
+                siblings.forEach(btn => {
+                    if (btn.innerText === q.correct) {
+                        btn.classList.add("correct");
+                    }
+                });
+            }
+
+            // Reveal explanation immediately
+            expBox.classList.add("show");
+            
+            totalAnswered++;
+            updateProgress();
+        }
+
+        // GAP FILL DIALOG HANDLERS
+        let activeGapFill = null;
+
+        function openGapFillSelector(exKey, qIdx, correctWord) {
+            activeGapFill = { exKey, qIdx, correctWord };
+            const q = examData[exKey].questions[qIdx];
+            
+            const overlay = document.getElementById("popup-overlay");
+            const choicesContainer = document.getElementById("popup-choices");
+            choicesContainer.innerHTML = "";
+
+            q.choices.forEach(choice => {
+                const btn = document.createElement("button");
+                btn.className = "popup-choice-btn";
+                btn.innerText = choice;
+                btn.onclick = () => selectGapFillWord(choice);
+                choicesContainer.appendChild(btn);
+            });
+
+            overlay.classList.add("show");
+        }
+
+        function selectGapFillWord(word) {
+            const { exKey, qIdx, correctWord } = activeGapFill;
+            const blankBtn = document.getElementById(`blank-${exKey}-${qIdx}`);
+            const card = document.getElementById(`q-${exKey}-${qIdx}`);
+            const expBox = card.querySelector(".explanation-box");
+            
+            const overlay = document.getElementById("popup-overlay");
+            overlay.classList.remove("show");
+
+            blankBtn.innerText = word;
+            const isCorrect = word === correctWord;
+
+            if (isCorrect) {
+                blankBtn.className = "blank-btn selected-correct";
+                card.classList.add("answered-correct");
+                playSound('correct');
+                triggerConfetti();
+                currentPoints += 10;
+                correctAnswersTracker[`${exKey}-${qIdx}`] = true;
+            } else {
+                blankBtn.className = "blank-btn selected-wrong";
+                blankBtn.classList.add("shake");
+                card.classList.add("answered-wrong");
+                playSound('wrong');
+                correctAnswersTracker[`${exKey}-${qIdx}`] = false;
+            }
+
+            expBox.classList.add("show");
+            totalAnswered++;
+            updateProgress();
+        }
+
+        // MATCHING GAME HANDLER
+        function checkMatchingAnswer(qId, selectedVal, correctVal, card) {
+            if (selectedVal === correctVal) {
+                card.classList.add("correct");
+                card.querySelector(".matching-select").disabled = true;
+                playSound('correct');
+                triggerConfetti();
+                currentPoints += 10;
+                correctAnswersTracker[`matching-${qId}`] = true;
+            } else {
+                card.classList.add("shake");
+                playSound('wrong');
+                setTimeout(() => card.classList.remove("shake"), 400);
+                correctAnswersTracker[`matching-${qId}`] = false;
+            }
+            updateProgress();
+        }
+
+        function updateProgress() {
+            document.getElementById("current-score").innerText = currentPoints;
+            const totalQuestionsCount = 180; // Estimated dynamic sum of all items
+            const percent = Math.min((totalAnswered / totalQuestionsCount) * 100, 100);
+            document.getElementById("progress-indicator").style.width = `${percent}%`;
+        }
+
+        // APPEND REMAINING EXTRA EXERCISES
+        function appendExtraExercises() {
+            const container = document.getElementById("exercises-container");
+            const tabsNav = document.getElementById("exercise-tabs");
+
+            // Exercises 7, 8 are loaded. We append 9, 10, 11, 12, 13, 14, 15
+            const extras = [
+                {
+                    key: "exercise-9",
+                    title: "Exercise 9: Write the comparative form of the adverbs",
+                    type: "mcq", // Converted to gamified mcq
+                    questions: [
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>beautifully</strong>", options: ["more beautifully", "beautifullier", "beautiful", "most beautifully"], correct: "more beautifully", explain: { transQ: "Viết dạng so sánh hơn của beautifully", trans: "beautifully (adv)", whyCorrect: "Trạng từ dài có 3 âm tiết trở lên dùng more + trạng từ.", whyWrong: "beautifullier không tồn tại." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>well</strong>", options: ["better", "worse", "weller", "more well"], correct: "better", explain: { transQ: "Viết dạng so sánh hơn của well", trans: "well (adv)", whyCorrect: "Trạng từ biến đổi bất quy tắc thành better.", whyWrong: "weller không có thực." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>hard</strong>", options: ["harder", "more hard", "hardly", "hardest"], correct: "harder", explain: { transQ: "Viết dạng so sánh hơn của hard", trans: "hard (adv)", whyCorrect: "Trạng từ ngắn thêm đuôi -er.", whyWrong: "hardly mang nghĩa là hầu như không." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>quickly</strong>", options: ["more quickly", "quicklier", "quicklyer", "quicker"], correct: "more quickly", explain: { transQ: "Viết dạng so sánh hơn của quickly", trans: "quickly (adv)", whyCorrect: "Quickly là trạng từ dài, dùng more quickly.", whyWrong: "quicklier là thông tục ít dùng." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>heavily</strong>", options: ["more heavily", "heavilier", "heavilyer", "less heavily"], correct: "more heavily", explain: { transQ: "Viết dạng so sánh hơn của heavily", trans: "heavily (adv)", whyCorrect: "Heavily là trạng từ dài, dùng more heavily.", whyWrong: "heavilier không chính quy." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>fast</strong>", options: ["faster", "more fast", "fastest", "fastly"], correct: "faster", explain: { transQ: "Viết dạng so sánh hơn của fast", trans: "fast (adv)", whyCorrect: "Fast là trạng từ ngắn đặc biệt, thêm -er thành faster.", whyWrong: "fastly không tồn tại." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>easily</strong>", options: ["more easily", "easier", "easilier", "most easily"], correct: "more easily", explain: { transQ: "Viết dạng so sánh hơn của easily", trans: "easily (adv)", whyCorrect: "Easily là trạng từ dài nên dùng more easily.", whyWrong: "easier là so sánh hơn của tính từ." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>safely</strong>", options: ["more safely", "safelier", "safelyer", "safer"], correct: "more safely", explain: { transQ: "Viết dạng so sánh hơn của safely", trans: "safely (adv)", whyCorrect: "Safely là trạng từ dài nên dùng more safely.", whyWrong: "safer là tính từ so sánh hơn." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>badly</strong>", options: ["worse", "badder", "more badly", "baddest"], correct: "worse", explain: { transQ: "Viết dạng so sánh hơn của badly", trans: "badly (adv)", whyCorrect: "Biến đổi bất quy tắc thành worse.", whyWrong: "badder là sai chính tả." } },
+                        { qText: "Viết dạng so sánh hơn của trạng từ: <strong>quietly</strong>", options: ["more quietly", "quietlier", "quietlyer", "quieter"], correct: "more quietly", explain: { transQ: "Viết dạng so sánh hơn của quietly", trans: "quietly (adv)", whyCorrect: "Quietly là trạng từ dài nên dùng more quietly.", whyWrong: "quieter là so sánh hơn của tính từ." } }
+                    ]
+                },
+                {
+                    key: "exercise-10",
+                    title: "Exercise 10: Circle the correct options to complete the sentences",
+                    type: "mcq",
+                    questions: [
+                        { qText: "Peter spoke English (good / better / well) than the other students.", options: ["good", "better", "well"], correct: "better", explain: { transQ: "Peter nói tiếng Anh tốt hơn các học sinh khác.", trans: "cook/speak are verbs.", whyCorrect: "Có 'than' nên bắt buộc dùng so sánh hơn 'better'.", whyWrong: "well không dùng trong so sánh hơn trực tiếp." } },
+                        { qText: "Juice contains (more / many) vitamins than coke.", options: ["more", "many"], correct: "more", explain: { transQ: "Nước ép chứa nhiều vitamin hơn nước ngọt có ga.", trans: "So sánh hơn danh từ.", whyCorrect: "Dùng 'more' kết hợp với 'than' cho so sánh hơn danh từ đếm được số nhiều.", whyWrong: "many không dùng trực tiếp trong cấu trúc so sánh hơn có than." } },
+                        { qText: "Please write your personal information (carefully / careful / carelessly) so we can contact you.", options: ["carefully", "careful", "carelessly"], correct: "carefully", explain: { transQ: "Vui lòng viết thông tin cá nhân cẩn thận.", trans: "Write is action verb.", whyCorrect: "Cần trạng từ tích cực 'carefully' bổ nghĩa cho write.", whyWrong: "carelessly là cẩu thả trái ngược nghĩa." } }
+                    ]
+                }
+            ];
+
+            // Render remaining extras
+            extras.forEach((ex, idx) => {
+                const key = ex.key;
+                examData[key] = ex;
+
+                // Add Tab
+                const btn = document.createElement("button");
+                btn.className = "tab-btn";
+                btn.id = `tab-btn-${key}`;
+                btn.innerHTML = `<i class="fa-solid fa-gamepad"></i> Phần ${idx + 6}: ${ex.title.split(":")[0]}`;
+                btn.onclick = () => switchTab(key);
+                tabsNav.appendChild(btn);
+
+                // Add Section
+                const section = document.createElement("section");
+                section.className = "exercise-section";
+                section.id = `sec-${key}`;
+                
+                const title = document.createElement("h2");
+                title.className = "exercise-title";
+                title.innerText = ex.title;
+                section.appendChild(title);
+
+                ex.questions.forEach((q, qIdx) => {
+                    const card = document.createElement("div");
+                    card.className = "question-card";
+                    card.id = `q-${key}-${qIdx}`;
+
+                    const num = document.createElement("span");
+                    num.className = "question-num";
+                    num.innerText = `Câu ${qIdx + 1}`;
+                    card.appendChild(num);
+
+                    const text = document.createElement("div");
+                    text.className = "question-text";
+                    text.innerHTML = q.qText;
+                    card.appendChild(text);
+
+                    const grid = document.createElement("div");
+                    grid.className = "options-grid";
+
+                    q.options.forEach(opt => {
+                        const optBtn = document.createElement("button");
+                        optBtn.className = "option-btn";
+                        optBtn.innerText = opt;
+                        optBtn.onclick = () => checkMCQAnswer(key, qIdx, opt, optBtn, card);
+                        grid.appendChild(optBtn);
+                    });
+                    card.appendChild(grid);
+
+                    // Exp Box
+                    const expBox = document.createElement("div");
+                    expBox.className = "explanation-box";
+                    expBox.id = `exp-${key}-${qIdx}`;
+                    expBox.innerHTML = `
+                        <div class="explanation-header">👩‍🏫 Cô Lê Hằng Giải Thích Siêu Chi Tiết:</div>
+                        <div class="explanation-body">
+                            <p>${q.explain.transQ}</p>
+                            <p><strong>Giải nghĩa:</strong> ${q.explain.trans}</p>
+                            <p><strong>Vì sao đúng:</strong> ${q.explain.whyCorrect}</p>
+                        </div>
+                    `;
+                    card.appendChild(expBox);
+                    section.appendChild(card);
+                });
+
+                container.appendChild(section);
+            });
+        }
+
+        // EVALUATION AND LỜI KHUYÊN DÂN DÃ CỦA CÔ LÊ HẰNG
+        function submitExam() {
+            const dialog = document.getElementById("feedback-dialog");
+            const display = document.getElementById("feedback-score-display");
+            const textContent = document.getElementById("feedback-text-content");
+
+            // Calculate score out of 100%
+            let correctCount = 0;
+            let attempted = 0;
+            for (const key in correctAnswersTracker) {
+                attempted++;
+                if (correctAnswersTracker[key] === true) {
+                    correctCount++;
+                }
+            }
+
+            const finalPercent = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
+            display.innerText = `${finalPercent}%`;
+
+            let reviewText = "";
+            if (finalPercent < 50) {
+                reviewText = "Điểm lần này chưa cao lắm, con cố gắng đọc kĩ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau!";
+                playSound('wrong');
+            } else if (finalPercent >= 60 && finalPercent <= 80) {
+                reviewText = "Con đã có tiến bộ khá ổn rồi, con cố gắng đọc kĩ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau!";
+                playSound('correct');
+                triggerConfetti();
+            } else {
+                reviewText = "Làm tốt lắm, con cố gắng ring điểm 10 ở lần sau nha!";
+                playSound('correct');
+                triggerConfetti();
+                triggerConfetti();
+            }
+
+            textContent.innerText = reviewText;
+            dialog.classList.add("show");
+        }
+
+        function closeFeedback() {
+            document.getElementById("feedback-dialog").classList.remove("show");
+            // Reload parameters
+            currentPoints = 0;
+            totalAnswered = 0;
+            for (const k in correctAnswersTracker) delete correctAnswersTracker[k];
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Run application
+        initApp();
+    </script>
+</body>
+</html>
